@@ -16,6 +16,7 @@ class CreateMatchesTable extends Migration
         Schema::create('matches', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
+            $table->string('name');
             $table->integer('round');
             $table->enum('status', ['pending', 'open', 'complete'])->default('pending');
 

@@ -19,7 +19,8 @@ Route::get('rumble', function () {
     /**
      * Configuration
      */
-    $numberOfPlayers = 9;
+    $tournamentName = 'NGC #9';
+    $numberOfPlayers = 15;
     $players = range(1, $numberOfPlayers);
     $players = array_map(function ($player) {
         return "Player $player";
@@ -27,21 +28,10 @@ Route::get('rumble', function () {
     $numberOfPlayersByMatch = 2;
     $numberOfWinnersByMatch = 1;
 
-    /**
-     * Rumble
-     */
-    $matches = app(\App\Services\Tournament\Tournament::class)->buildTree(
-        count($players),
-        $numberOfPlayersByMatch,
-        $numberOfWinnersByMatch
-    );
-
-    $firstRound = app(\App\Services\Tournament\Tournament::class)->distribPlayersForRound(
+    $tournament = app(\App\Services\Tournament\TournamentService::class)->make(
+        $tournamentName,
         $players,
-        max(array_keys($matches)),
         $numberOfPlayersByMatch,
         $numberOfWinnersByMatch
     );
-
-    dd($matches, $firstRound);
 });

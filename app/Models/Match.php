@@ -12,7 +12,7 @@ class Match extends Model
      * @var array
      */
     protected $fillable = [
-        'round', 'status',
+        'name', 'round', 'status',
     ];
 
     /**
