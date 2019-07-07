@@ -7,23 +7,23 @@ class Tournament
     /**
      * Construit un tournoi.
      * 
-     * @param array $players
+     * @param int $numberOfPlayers
      * @param int $numberOfPlayersByMatch
      * @param int $numberOfWinnersByMatch
      * @return array
      */
-    public function build(array $players, int $numberOfPlayersByMatch, int $numberOfWinnersByMatch) : array
+    public function buildTree(int $numberOfPlayers, int $numberOfPlayersByMatch, int $numberOfWinnersByMatch) : array
     {
-        $matches = [];
+        $tree = [];
         
         $numberOfRounds = $this->getNumberOfRounds(
-            count($players),
+            $numberOfPlayers,
             $numberOfPlayersByMatch,
             $numberOfWinnersByMatch
         );
 
         for ($roundIndex = $numberOfRounds; $roundIndex >= 0; $roundIndex--) {
-            $matches[$roundIndex] = [];
+            $tree[$roundIndex] = [];
 
             $numberOfSlotsInThisRound = $this->getNumberOfSlotsForThisRound(
                 $roundIndex,
@@ -33,23 +33,57 @@ class Tournament
 
             $numberOfMatchesInThisRound = $numberOfSlotsInThisRound / $numberOfPlayersByMatch;
 
-            // TODO : prendre en considération les gagnants pour les tours suivants
-            $playersAvailable = array_pad($players, $numberOfSlotsInThisRound, null);
-
             for ($matchIndex = 0; $matchIndex < $numberOfMatchesInThisRound; $matchIndex++) {
-                $match = [];
-                for ($j = 0; $j < $numberOfPlayersByMatch; $j++) {
-                    $index = rand(0, count($playersAvailable) - 1);
-                    $match[] = $playersAvailable[$index];
-                    unset($playersAvailable[$index]);
-                    $playersAvailable = array_values($playersAvailable);
-                }
+                $match = [
+                    'slots' => array_fill(0, $numberOfPlayersByMatch, null),
+                ];
 
-                $matches[$roundIndex][] = $match;
+                $tree[$roundIndex][] = $match;
             }
         }
 
-        return $matches;
+        sort($tree);
+
+        return $tree;
+    }
+
+    /**
+     * Place les joueurs dans les matchs aléatoirement.
+     *
+     * @param array $players
+     * @param int $roundIndex
+     * @param int $numberOfPlayersByMatch
+     * @param int $numberOfWinnersByMatch
+     * @return array
+     */
+    public function distribPlayersForRound(array $players, int $roundIndex, int $numberOfPlayersByMatch, int $numberOfWinnersByMatch) : array
+    {
+        $round = [];
+
+        $numberOfSlotsInThisRound = $this->getNumberOfSlotsForThisRound(
+            $roundIndex,
+            $numberOfPlayersByMatch,
+            $numberOfWinnersByMatch
+        );
+
+        $numberOfMatchesInThisRound = $numberOfSlotsInThisRound / $numberOfPlayersByMatch;
+
+        $players = array_pad($players, $numberOfSlotsInThisRound, null);
+
+        for ($matchIndex = 0; $matchIndex < $numberOfMatchesInThisRound; $matchIndex++) {
+            $match = [];
+
+            for ($j = 0; $j < $numberOfPlayersByMatch; $j++) {
+                $index = rand(0, count($players) - 1);
+                $match[] = $players[$index];
+                unset($players[$index]);
+                $players = array_values($players);
+            }
+
+            $round[] = $match;
+        }
+
+        return $round;
     }
 
     /**

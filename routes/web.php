@@ -30,11 +30,18 @@ Route::get('rumble', function () {
     /**
      * Rumble
      */
-    $matches = app(\App\Services\Tournament\Tournament::class)->build(
-        $players,
+    $matches = app(\App\Services\Tournament\Tournament::class)->buildTree(
+        count($players),
         $numberOfPlayersByMatch,
         $numberOfWinnersByMatch
     );
 
-    dd($matches);
+    $firstRound = app(\App\Services\Tournament\Tournament::class)->distribPlayersForRound(
+        $players,
+        max(array_keys($matches)),
+        $numberOfPlayersByMatch,
+        $numberOfWinnersByMatch
+    );
+
+    dd($matches, $firstRound);
 });
