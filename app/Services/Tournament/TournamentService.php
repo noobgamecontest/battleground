@@ -51,9 +51,22 @@ class TournamentService
             );
         }
 
-//        DB::commit();
+        DB::commit();
 
         return $tournament;
+    }
+
+    /**
+     * Retourne les tours d'un tournoi.
+     *
+     * @param Tournament $tournament
+     * @return array
+     */
+    public function getRounds(Tournament $tournament) : array
+    {
+        return $tournament->matches->pluck('round')->unique()->values()->sort(function ($a, $b) {
+            return $a < $b;
+        })->toArray();
     }
 
     /**
