@@ -14,3 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::prefix('tournament')->namespace('Tournament')->group(function () {
+    Route::get('/', 'TournamentController@index')->name('tournament.index');
+    Route::get('/show/{id}', 'TournamentController@show')->name('tournament.show');
+    Route::post('/register', 'TournamentController@register')->name('tournament.register');
+});
