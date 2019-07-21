@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Tournament;
 
-use App\Models\Tournament;
+use Illuminate\Http\Request;
 use App\Services\TournamentService;
 use App\Http\Controllers\Controller;
 
@@ -35,5 +35,35 @@ class TournamentController extends Controller
         $tournaments = $this->service->getAllAvailablesTournaments();
 
         return view('tournaments.index', ['tournaments' => $tournaments]);
+    }
+
+    /**
+     * Display a specific tournament
+     *
+     * @param int $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function show($id)
+    {
+        $tournament = $this->service->find($id);
+
+        return view('tournaments.show', ['tournament' => $tournament]);
+    }
+
+    /**
+     * Subscribe a team to a tournament
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function subscribe(Request $request, $id)
+    {
+        $tournament = $this->service->find($id);
+
+        $this->service->createTeam($tournament, $request->get('teamName'));
+
+        $request->session()->flash('alert-success', trans('layouts.tournaments.subscribe.success'));
+        return redirect()->route('tournament.show', $tournament->id);
     }
 }

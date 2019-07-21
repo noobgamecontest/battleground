@@ -15,14 +15,14 @@ class UserRoleTest extends TestCase
     {
         $tournament = factory(Tournament::class)->create();
 
-        $response = $this->get('tournament/index');
+        $response = $this->get('tournament');
 
         $response->assertStatus(200);
         $response->assertSee($tournament->name);
     }
 
     /** @test */
-    public function userCanGoToASpecificTournament()
+    public function userCanSubscribeToASpecificTournament()
     {
         $tournament = factory(Tournament::class)->create();
 
@@ -31,16 +31,17 @@ class UserRoleTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee($tournament->name);
 
+        $teamName = md5(time());
+
         $params = [
-            'tournamentId' => $tournament->id,
-            'name' => 'Marky',
+            'teamName' => $teamName,
         ];
 
-        $response = $this->post('tournament/register', $params);
+        $response = $this->post('tournament/subscribe/' . $tournament->id, $params);
         $response->assertStatus(302);
 
         $this->assertDatabaseHas('teams', [
-            'name' => 'Marky',
+            'name' => $teamName,
             'tournament_id' => $tournament->id,
         ]);
     }

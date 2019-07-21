@@ -5,7 +5,9 @@
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="card">
-                    <div class="card-header">@lang('layouts.tournaments.index.title')</div>
+                    <div class="card-header">
+                        <h3>@lang('layouts.tournaments.index.title')</h3>
+                    </div>
                     <div class="card-body">
                         <table class="table table-striped">
                             <thead>
