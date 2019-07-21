@@ -2,20 +2,27 @@
 
 namespace App\Http\Controllers\Tournament;
 
-use App\Http\Controllers\Controller;
 use App\Models\Tournament;
-use Illuminate\Support\Facades\Validator;
+use App\Services\TournamentService;
+use App\Http\Controllers\Controller;
 
 class TournamentController extends Controller
 {
     /**
+     * @var \App\Services\TournamentService
+     */
+    protected $service;
+
+    /**
      * Create a new controller instance.
      *
+     * @param \App\Services\TournamentService $service
      * @return void
      */
-    public function __construct()
+    public function __construct(TournamentService $service)
     {
         $this->middleware('guest');
+        $this->service = $service;
     }
 
     /**
@@ -25,8 +32,8 @@ class TournamentController extends Controller
      */
     public function index()
     {
-        $tournaments = Tournament::all();
+        $tournaments = $this->service->getAllAvailablesTournaments();
 
-        return view('tournament.index', ['tournaments' => $tournaments]);
+        return view('tournaments.index', ['tournaments' => $tournaments]);
     }
 }

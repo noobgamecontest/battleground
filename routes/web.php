@@ -15,6 +15,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
 Route::prefix('tournament')->namespace('Tournament')->group(function () {
     Route::get('/', 'TournamentController@index')->name('tournament.index');
     Route::get('/show/{id}', 'TournamentController@show')->name('tournament.show');

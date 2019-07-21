@@ -12,6 +12,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        factory(Tournament::class, 5)->create();
+        factory(Tournament::class)->create(['name' => 'Smash Bros']);
+        factory(Tournament::class)->create(['name' => 'Mario Kart']);
+        factory(Tournament::class)->create(['name' => 'Just Dance']);
+        factory(Tournament::class)->create(['name' => 'Fifa 19']);
     }
 }

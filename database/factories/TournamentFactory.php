@@ -9,7 +9,6 @@ use Faker\Generator as Faker;
 $factory->define(Tournament::class, function (Faker $faker) {
     return [
         'name' => $faker->userName,
-        'started_at' => Carbon::now(),
-        'ended_at' => Carbon::tomorrow(),
+        'started_at' => Carbon::tomorrow(),
     ];
 });
