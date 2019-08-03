@@ -13,7 +13,7 @@
                     <div class="card-body">
                         <form class="form-inline" method="post" action="{{ route('tournament.subscribe') }}">
                             @csrf
-                            <input type="hidden" name="id" value="{{ $tournament->id }}">
+                            <input type="hidden" name="tournamentId" value="{{ $tournament->id }}">
                             <div class="form-group mx-sm-3 mb-2">
                                 <label for="teamName" class="col-sm-3 col-form-label">@lang('layouts.common.team_name')</label>
                                 <input type="text" name="teamName" class="form-control" id="teamName">
@@ -28,6 +28,9 @@
                             <tr>
                                 <th>@lang('layouts.common.number')</th>
                                 <th>@lang('layouts.common.teams')</th>
+                                @if (Auth::check() && Auth::user()->isAdmin())
+                                    <th>@lang('layouts.common.action')</th>
+                                @endif
                             </tr>
                             </thead>
                             <tbody>
@@ -35,6 +38,15 @@
                                     <tr>
                                         <td>{{ $team->id }}</td>
                                         <td>{{ $team->name }}</td>
+                                        @if (Auth::check() && Auth::user()->isAdmin())
+                                            <td>
+                                                <form method="post" action="{{ route('tournament.deleteTeam') }}">
+                                                    @csrf
+                                                    <input type="hidden" name="teamId" value="{{ $team->id }}">
+                                                    <button type="submit" class="btn btn-danger mb-2">@lang('layouts.common.delete')</button>
+                                                </form>
+                                            </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>

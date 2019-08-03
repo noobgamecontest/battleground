@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Validator::extend('teamName', function ($attribute, $value, $parameters, $validator) {
             $datas = $validator->getData();
-            $tournament = Tournament::find($datas['id']);
+            $tournament = Tournament::find($datas['tournamentId']);
 
             $target = $tournament->teams->where('name', $value);
 

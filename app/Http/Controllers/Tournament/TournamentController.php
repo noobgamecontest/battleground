@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Tournament;
 
+use Illuminate\Http\Request;
+use App\Services\TeamService;
 use App\Services\TournamentService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SubscribeRequest;
@@ -11,18 +13,24 @@ class TournamentController extends Controller
     /**
      * @var \App\Services\TournamentService
      */
-    protected $service;
+    protected $tournamentService;
+
+    /**
+     * @var \App\Services\TeamService
+     */
+    protected $teamService;
 
     /**
      * Create a new controller instance.
      *
-     * @param \App\Services\TournamentService $service
+     * @param \App\Services\TournamentService $tournamentService
+     * @param \App\Services\TeamService $teamService
      * @return void
      */
-    public function __construct(TournamentService $service)
+    public function __construct(TournamentService $tournamentService, TeamService $teamService)
     {
-        $this->middleware('guest');
-        $this->service = $service;
+        $this->tournamentService = $tournamentService;
+        $this->teamService = $teamService;
     }
 
     /**
@@ -32,7 +40,7 @@ class TournamentController extends Controller
      */
     public function index()
     {
-        $tournaments = $this->service->getAllAvailablesTournaments();
+        $tournaments = $this->tournamentService->getAllAvailablesTournaments();
 
         return view('tournaments.index', ['tournaments' => $tournaments]);
     }
@@ -45,7 +53,7 @@ class TournamentController extends Controller
      */
     public function show($id)
     {
-        $tournament = $this->service->find($id);
+        $tournament = $this->tournamentService->find($id);
 
         return view('tournaments.show', ['tournament' => $tournament]);
     }
@@ -58,11 +66,25 @@ class TournamentController extends Controller
      */
     public function subscribe(SubscribeRequest $request)
     {
-        $tournament = $this->service->find($request->get('id'));
+        $tournament = $this->tournamentService->find($request->get('tournamentId'));
 
-        $this->service->createTeam($tournament, $request->get('teamName'));
+        $this->teamService->create($tournament, $request->get('teamName'));
 
         $request->session()->flash('alert-success', trans('layouts.tournaments.subscribe.success'));
         return redirect()->route('tournament.show', $tournament->id);
+    }
+
+    /**
+     * Delete a team from a tournament
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function deleteTeam(Request $request)
+    {
+        $this->teamService->delete($request->get('teamId'));
+
+        $request->session()->flash('alert-success', trans('layouts.tournaments.deleteTeam.success'));
+        return redirect()->back();
     }
 }

@@ -10,6 +10,7 @@ return [
         'number' => 'Number',
         'teams' => 'Teams',
         'team_name' => 'Team name',
+        'delete' => 'Delete',
     ],
 
     'tournaments' => [
@@ -22,5 +23,8 @@ return [
         'subscribe' => [
             'success' => 'Team was successful added',
         ],
+        'deleteTeam' => [
+            'success' => 'Team was successful deleted',
+        ]
     ],
 ];

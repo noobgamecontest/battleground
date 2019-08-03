@@ -12,7 +12,7 @@ class Team extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'position',
+        'name', 'position'
     ];
 
     /**
@@ -21,5 +21,13 @@ class Team extends Model
     public function matches()
     {
         return $this->belongsToMany(Match::class)->withPivot('score');
+    }
+
+    /**
+     * The tournament that belong to the team.
+     */
+    public function tournament()
+    {
+        return $this->belongsTo(Tournament::class);
     }
 }
