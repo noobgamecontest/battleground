@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
+use App\Models\Team;
 use App\Models\Tournament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -34,10 +35,11 @@ class UserRoleTest extends TestCase
         $teamName = md5(time());
 
         $params = [
+            'id' => $tournament->id,
             'teamName' => $teamName,
         ];
 
-        $response = $this->post('tournament/subscribe/' . $tournament->id, $params);
+        $response = $this->post('tournament/subscribe', $params);
         $response->assertStatus(302);
 
         $this->assertDatabaseHas('teams', [
@@ -45,4 +47,32 @@ class UserRoleTest extends TestCase
             'tournament_id' => $tournament->id,
         ]);
     }
+
+    /** @test */
+    public function userCantSubscribeToASpecificTournamentWithExistingTeamName()
+    {
+        $tournament = factory(Tournament::class)->create();
+        factory(Team::class)->create([
+            'name' => 'NameTest',
+            'tournament_id' => $tournament->id
+        ]);
+
+        $params = [
+            'id' => $tournament->id,
+            'teamName' => 'NameTest',
+        ];
+
+        $response = $this->post('tournament/subscribe', $params);
+        $response->assertStatus(302);
+
+        $response->assertSessionHasErrors([
+            'teamName' => 'This team name already exists',
+        ]);
+    }
+
+    /** @test */
+//    public function adminCanDeleteATeamFromTournament()
+//    {
+//
+//    }
 }

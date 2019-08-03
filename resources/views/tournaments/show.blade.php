@@ -11,11 +11,15 @@
                         <h4>@lang('layouts.tournaments.show.begin', ['date' => $tournament->started_at])</h4>
                     </div>
                     <div class="card-body">
-                        <form class="form-inline" method="post" action="{{ route('tournament.subscribe', $tournament->id) }}">
+                        <form class="form-inline" method="post" action="{{ route('tournament.subscribe') }}">
                             @csrf
+                            <input type="hidden" name="id" value="{{ $tournament->id }}">
                             <div class="form-group mx-sm-3 mb-2">
                                 <label for="teamName" class="col-sm-3 col-form-label">@lang('layouts.common.team_name')</label>
                                 <input type="text" name="teamName" class="form-control" id="teamName">
+                                @if ($errors->has('teamName'))
+                                    <div class="error">{{ $errors->first('teamName') }}</div>
+                                @endif
                             </div>
                             <button type="submit" class="btn btn-primary mb-2">@lang('layouts.common.register')</button>
                         </form>

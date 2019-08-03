@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Tournament;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use App\Services\TournamentService;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SubscribeRequest;
 
 class TournamentController extends Controller
 {
@@ -53,13 +54,12 @@ class TournamentController extends Controller
     /**
      * Subscribe a team to a tournament
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
+     * @param \App\Http\Requests\SubscribeRequest
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function subscribe(Request $request, $id)
+    public function subscribe(SubscribeRequest $request)
     {
-        $tournament = $this->service->find($id);
+        $tournament = $this->service->find($request->get('id'));
 
         $this->service->createTeam($tournament, $request->get('teamName'));
 
