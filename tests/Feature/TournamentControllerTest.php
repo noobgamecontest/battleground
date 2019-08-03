@@ -69,10 +69,4 @@ class UserRoleTest extends TestCase
             'teamName' => 'This team name already exists',
         ]);
     }
-
-    /** @test */
-//    public function adminCanDeleteATeamFromTournament()
-//    {
-//
-//    }
 }

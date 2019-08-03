@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Tournament;
 
-use Illuminate\Support\Facades\Session;
 use App\Services\TournamentService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SubscribeRequest;
