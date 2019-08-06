@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateTournamentRequest;
 use App\Models\Tournament;
-use Illuminate\Http\Request;
+use App\Http\Requests\EditTournamentRequest;
+use App\Http\Requests\CreateTournamentRequest;
 
 class TournamentsController extends Controller
 {
@@ -36,7 +36,7 @@ class TournamentsController extends Controller
      */
     public function store(CreateTournamentRequest $request)
     {
-        $tournament = Tournament::create($request->validated());
+        $tournament = new Tournament($request->validated());
 
         $tournament->save();
 
@@ -62,17 +62,17 @@ class TournamentsController extends Controller
      */
     public function edit(Tournament $tournament)
     {
-        return view('tournaments.edit', $tournament);
+        return view('tournaments.edit', ['tournament' => $tournament]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Tournament  $tournament
+     * @param EditTournamentRequest $request
+     * @param \App\Models\Tournament $tournament
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Tournament $tournament)
+    public function update(EditTournamentRequest $request, Tournament $tournament)
     {
         $tournament->update($request->validated());
 
@@ -82,13 +82,14 @@ class TournamentsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Tournament  $tournament
+     * @param \App\Models\Tournament $tournament
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function destroy(Tournament $tournament)
     {
         $tournament->delete();
 
-        return redirect('tournaments.index');
+        return redirect()->route('tournaments.index');
     }
 }

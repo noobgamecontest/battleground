@@ -12,7 +12,7 @@ class Tournament extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'started_at', 'ended_at',
+        'name', 'started_at', 'ended_at', 'slots', 'opponents_by_match', 'winners_by_match',
     ];
 
     /**

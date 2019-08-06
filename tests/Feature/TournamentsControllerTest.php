@@ -46,11 +46,56 @@ class TournamentsControllerTest extends TestCase
 
         $response->assertSeeText("Création d'un tournoi");
         $response->assertStatus(200);
-
-        $response = $this->actingAs($admin)->post('tournaments', [
+        
+        $properties = [
             'name' => 'Easy Contest',
-        ]);
+            'slots' => 4,
+            'opponents_by_match' => 2,
+            'winners_by_match' => 1,            
+        ];
 
+        $response = $this->actingAs($admin)->post('tournaments', $properties);
+        
         $response->assertRedirect('tournaments/1');
+        
+        $this->assertDatabaseHas('tournaments', $properties);
+    }
+
+    /** @test */
+    public function admin_can_update_one()
+    {
+        $admin = factory(User::class)->state('admin')->create();
+        $tournament = factory(Tournament::class)->create();
+
+        $response = $this->actingAs($admin)->get('tournaments/' . $tournament->id . '/edit');
+
+        $response->assertSeeText("Edition d'un tournoi");
+        $response->assertStatus(200);
+
+        $properties = [
+            'name' => 'Easy Contest',
+            'slots' => 4,
+            'opponents_by_match' => 2,
+            'winners_by_match' => null,
+        ];
+
+        $response = $this->actingAs($admin)->put('tournaments/' . $tournament->id, $properties);
+
+        $response->assertRedirect('tournaments/' . $tournament->id);
+
+        $this->assertDatabaseHas('tournaments', ['id' => $tournament->id] + $properties);
+    }
+
+    /** @test */
+    public function admin_can_delete_one()
+    {
+        $admin = factory(User::class)->state('admin')->create();
+        $tournament = factory(Tournament::class)->create();
+
+        $response = $this->actingAs($admin)->delete('tournaments/' . $tournament->id);
+
+        $response->assertRedirect('tournaments');
+
+        $this->assertDatabaseMissing('tournaments', ['id' => $tournament->id]);
     }
 }
