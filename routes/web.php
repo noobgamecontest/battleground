@@ -11,14 +11,15 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/', 'TournamentsController@index')->name('tournaments.index');
 
 Route::middleware('admin')->group(function () {
-    Route::resource('tournaments', 'TournamentsController');
+    Route::resource('tournaments', 'TournamentsController')->except(['index', 'show']);
 });
+
+Route::middleware('auth')->group(function () {
+   Route::resource('tournaments', 'TournamentsController')->only('show');
+});
+

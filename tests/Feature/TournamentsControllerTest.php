@@ -13,12 +13,11 @@ class TournamentsControllerTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function admin_can_list_tournaments()
+    public function guest_can_list_tournaments()
     {
-        $admin = factory(User::class)->state('admin')->create();
         $tournaments = factory(Tournament::class, 2)->create();
 
-        $response = $this->actingAs($admin)->get('tournaments');
+        $response = $this->get('/');
 
         $response->assertSeeText($tournaments->first()->name);
         $response->assertSeeText($tournaments->last()->name);
@@ -26,9 +25,9 @@ class TournamentsControllerTest extends TestCase
     }
 
     /** @test */
-    public function admin_can_show_one()
+    public function user_can_show_one()
     {
-        $admin = factory(User::class)->state('admin')->create();
+        $admin = factory(User::class)->create();
         $tournament = factory(Tournament::class)->create();
 
         $response = $this->actingAs($admin)->get('tournaments/' . $tournament->id);
@@ -94,7 +93,7 @@ class TournamentsControllerTest extends TestCase
 
         $response = $this->actingAs($admin)->delete('tournaments/' . $tournament->id);
 
-        $response->assertRedirect('tournaments');
+        $response->assertRedirect('/');
 
         $this->assertDatabaseMissing('tournaments', ['id' => $tournament->id]);
     }
