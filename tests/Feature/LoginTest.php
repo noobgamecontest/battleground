@@ -34,7 +34,7 @@ class LoginTest extends TestCase
 
         $response = $this->post('/login', ['email' => $user->email, 'password' => 'password']);
 
-        $response->assertRedirect('/home');
+        $response->assertRedirect('/');
         $this->assertAuthenticatedAs($user);
     }
 }
