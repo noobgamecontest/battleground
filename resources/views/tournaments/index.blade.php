@@ -8,12 +8,20 @@
                     Tournois
                 </div>
                 <div class="card-body">
+                    @admin
+                    <a href="{{ route('tournaments.create') }}" class="btn btn-primary btn-block mb-2">Créer un tournoi</a>
+                    @endadmin
                     @foreach($tournaments as $tournament)
                         <div class="card mb-2">
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col-md-4">
-                                        <h5 class="card-title">{{ $tournament->name }}</h5>
+                                        <h5 class="card-title">
+                                            {{ $tournament->name }}
+                                            @admin
+                                                (<a href="{{ route('tournaments.edit', $tournament) }}">éditer</a>)
+                                            @endadmin
+                                        </h5>
                                         <h6 class="card-subtitle text-muted">{{ 'Mario Kart 8' }}</h6>
                                     </div>
                                     <div class="col-md-4">
