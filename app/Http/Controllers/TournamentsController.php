@@ -19,6 +19,18 @@ class TournamentsController extends Controller
     }
 
     /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function history()
+    {
+        $tournaments = Tournament::whereNotNull('ended_at')->get();
+
+        return view('tournaments.history', ['tournaments' => $tournaments]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response

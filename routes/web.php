@@ -14,6 +14,7 @@
 Auth::routes();
 
 Route::get('/', 'TournamentsController@index')->name('tournaments.index');
+Route::get('/history', 'TournamentsController@history')->name('tournaments.history');
 
 Route::middleware('admin')->group(function () {
     Route::resource('tournaments', 'TournamentsController')->except(['index', 'show']);

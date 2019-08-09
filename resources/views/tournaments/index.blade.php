@@ -3,17 +3,9 @@
 @section('content')
     <div class="row justify-content-center">
         <div class="col-md-12">
-            <h2>Tournois</h2>
             <div class="card">
                 <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#">Ouverts</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Fermés</a>
-                        </li>
-                    </ul>
+                    Tournois
                 </div>
                 <div class="card-body">
                     @foreach($tournaments as $tournament)
