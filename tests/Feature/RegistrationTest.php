@@ -21,7 +21,7 @@ class RegistrationTest extends TestCase
         ];
         
         $this->post('/register', $userInformations)
-            ->assertRedirect('/home');
+            ->assertRedirect('/');
                 
         array_splice($userInformations, 2, 2);
         
