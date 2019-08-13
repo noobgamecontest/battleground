@@ -11,21 +11,14 @@ class RecoverPasswordTest extends TestCase
 {
     use RefreshDatabase;
     
-    const ROUTE_PASSWORD_EMAIL = 'password.email';
-    const ROUTE_PASSWORD_REQUEST = 'password.request';
-    const ROUTE_PASSWORD_RESET = 'password.reset';
-    const ROUTE_PASSWORD_RESET_SUBMIT = 'password.reset.submit';
-
-    const USER_ORIGINAL_PASSWORD = 'secret';
-    
     /** @test */
-    public function test_password_reset()
+    public function existing_user_reset_his_password()
     {
         $user = factory(User::class)->create();
                 
         $this->followingRedirects()
-            ->from(route(self::ROUTE_PASSWORD_REQUEST))
-            ->post(route(self::ROUTE_PASSWORD_EMAIL), [
+            ->from(route('password.request'))
+            ->post(route('password.email'), [
                 'email' => $user->email,
             ])
             ->assertSuccessful()
@@ -33,11 +26,11 @@ class RecoverPasswordTest extends TestCase
     }
     
     /** @test */
-    public function test_password_reset_with_invalid_email()
+    public function guest_reset_his_password_with_invalid_email_address()
     {
         $this->followingRedirects()
-            ->from(route(self::ROUTE_PASSWORD_REQUEST))
-            ->post(route(self::ROUTE_PASSWORD_EMAIL), [
+            ->from(route('password.request'))
+            ->post(route('password.email'), [
                 'email' => 'foo',
             ])
             ->assertSuccessful()
@@ -47,11 +40,11 @@ class RecoverPasswordTest extends TestCase
     }
     
     /** @test */
-    public function test_password_reset_with_unknown_email()
+    public function guest_reset_his_password_with_valid_email_address()
     {
         $this->followingRedirects()
-            ->from(route(self::ROUTE_PASSWORD_REQUEST))
-            ->post(route(self::ROUTE_PASSWORD_EMAIL), [
+            ->from(route('password.request'))
+            ->post(route('password.email'), [
                 'email' => 'foo@bar.baz',
             ])
             ->assertSuccessful()
