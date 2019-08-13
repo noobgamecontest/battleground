@@ -12,7 +12,7 @@ class RecoverPasswordTest extends TestCase
     use RefreshDatabase;
     
     /** @test */
-    public function existing_user_reset_his_password()
+    public function existing_user_can_reset_his_password()
     {
         $user = factory(User::class)->create();
                 
@@ -26,7 +26,7 @@ class RecoverPasswordTest extends TestCase
     }
     
     /** @test */
-    public function guest_reset_his_password_with_invalid_email_address()
+    public function guest_cant_reset_his_password_with_invalid_email_address()
     {
         $this->followingRedirects()
             ->from(route('password.request'))
@@ -40,7 +40,7 @@ class RecoverPasswordTest extends TestCase
     }
     
     /** @test */
-    public function guest_reset_his_password_with_valid_email_address()
+    public function guest_cant_reset_his_password_with_valid_email_address()
     {
         $this->followingRedirects()
             ->from(route('password.request'))
