@@ -31,6 +31,7 @@ Route::get('rumble', function () {
     \DB::beginTransaction();
 
     $tournament = new \App\Models\Tournament([
+        'name' => 'NGC #49',
         'slots' => 15,
         'opponents_by_match' => 2,
         'winners_by_match' => 1,
@@ -45,6 +46,6 @@ Route::get('rumble', function () {
         $tournament->teams()->save($team);
     });
 
-    app(\App\Services\Tournament\TournamentService::class)->builTree($tournament);
+    app(\App\Services\Tournament\TournamentService::class)->init($tournament);
 
 });

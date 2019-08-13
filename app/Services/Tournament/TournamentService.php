@@ -2,21 +2,30 @@
 
 namespace App\Services\Tournament;
 
-use App\Models\Team;
 use App\Models\Match;
 use App\Models\Tournament;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 
 class TournamentService
 {
+    /**
+     * Démarre un Tournoi
+     *
+     * @param Tournament $tournament
+     */
+    public function init(Tournament $tournament) : void
+    {
+        $this->buildTree($tournament);
+        $this->distribTeamsForFirstRound($tournament);
+    }
+
     /**
      * Construit l'arbre et les matchs du tournoi.
      *
      * @param Tournament $tournament
      * @return void
      */
-    public function buildTree(Tournament $tournament) : void
+    protected function buildTree(Tournament $tournament) : void
     {
         $numberOfRounds = $this->getNumberOfRounds(
             $tournament->teams()->count(),
@@ -42,6 +51,16 @@ class TournamentService
                 $tournament->matches()->save($match);
             }
         }
+    }
+
+    /**
+     * Distribue aléatoirement les équipes pour le 1er tound
+     *
+     * @param Tournament $tournament
+     */
+    protected function distribTeamsForFirstRound(Tournament $tournament) : void
+    {
+        // todo
     }
 
     /**
@@ -96,86 +115,12 @@ class TournamentService
      * @param Tournament $tournament
      * @return array
      */
-    public function getRounds(Tournament $tournament) : array
+    protected function getRounds(Tournament $tournament) : array
     {
         return $tournament->matches->pluck('round')->unique()->values()->sort(function ($a, $b) {
             return $a < $b;
         })->toArray();
     }
-
-    /**
-     * Crée le tournoi.
-     *
-     * @param string $name
-     * @return Tournament
-     */
-    protected function makeTournament(string $name) : Tournament
-    {
-        $tournament = new Tournament(['name' => $name]);
-        $tournament->save();
-        return $tournament;
-    }
-
-    /**
-     * Crée les équipes depuis leur nom.
-     *
-     * @param Tournament $tournament
-     * @param array $names
-     * @return Collection
-     */
-    protected function makeTeamsFromName(Tournament $tournament, array $names) : Collection
-    {
-        $teams = new Collection();
-
-        foreach ($names as $name) {
-            $team = new Team(['name' => $name]);
-            $tournament->teams()->save($team);
-            $teams->push($team);
-        }
-
-        return $teams;
-    }
-
-    /**
-     * Construit l'arbre et les matchs du tournoi.
-     *
-     * @param Tournament $tournament
-     * @param int $numberOfPlayers
-     * @param int $numberOfTeamsByMatch
-     * @param int $numberOfWinnersByMatch
-     * @return Collection
-     */
-//    protected function buildTree(Tournament $tournament, int $numberOfPlayers, int $numberOfTeamsByMatch, int $numberOfWinnersByMatch) : Collection
-//    {
-//        $matches = new Collection();
-//
-//        $numberOfRounds = $this->getNumberOfRounds(
-//            $numberOfPlayers,
-//            $numberOfTeamsByMatch,
-//            $numberOfWinnersByMatch
-//        );
-//
-//        for ($roundIndex = $numberOfRounds; $roundIndex >= 0; $roundIndex--) {
-//            $numberOfSlotsInThisRound = $this->getNumberOfSlotsForThisRound(
-//                $roundIndex,
-//                $numberOfTeamsByMatch,
-//                $numberOfWinnersByMatch
-//            );
-//
-//            $numberOfMatchesInThisRound = $numberOfSlotsInThisRound / $numberOfTeamsByMatch;
-//
-//            for ($matchIndex = 0; $matchIndex < $numberOfMatchesInThisRound; $matchIndex++) {
-//                $match = new Match([
-//                    'round' => $roundIndex,
-//                    'name' => "Match #$matchIndex for round #$roundIndex"
-//                ]);
-//                $tournament->matches()->save($match);
-//                $matches->push($match);
-//            }
-//        }
-//
-//        return $matches;
-//    }
 
     /**
      * Place les équipes dans les matchs du tour aléatoirement.
