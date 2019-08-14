@@ -4,7 +4,6 @@ namespace App\Services\Tournament;
 
 use App\Models\Match;
 use App\Models\Tournament;
-use Illuminate\Database\Eloquent\Collection;
 
 class TournamentService
 {
@@ -60,89 +59,18 @@ class TournamentService
      */
     protected function distribTeamsForFirstRound(Tournament $tournament) : void
     {
-        // todo
-    }
+        $matches = $tournament->matches;
 
-    /**
-     * Construit un tournoi.
-     *
-     * @param string $name
-     * @param array $teamsName
-     * @param int $numberOfTeamsByMatch
-     * @param int $numberOfWinnersByMatch
-     * @return Tournament
-     */
-//    public function make(string $name, array $teamsName, int $numberOfTeamsByMatch, int $numberOfWinnersByMatch) :  Tournament
-//    {
-//        DB::beginTransaction();
-//
-//        $tournament = $this->makeTournament($name);
-//
-//        $teams = $this->makeTeamsFromName($tournament, $teamsName);
-//
-//        $matches = $this->buildTree(
-//            $tournament,
-//            count($teams),
-//            $numberOfTeamsByMatch,
-//            $numberOfWinnersByMatch
-//        );
-//
-//        $firstRoundMatches = $matches->where(
-//            'round',
-//            $matches->pluck('round')->max()
-//        );
-//
-//        $this->distribTeamsForRound(
-//            $teams,
-//            $firstRoundMatches,
-//            $numberOfTeamsByMatch
-//        );
-//
-//        foreach ($firstRoundMatches as $match) {
-//            dump(
-//                sprintf("Match %s, équipes : %s", $match->name,  $match->teams->pluck('name')->join(' vs '))
-//            );
-//        }
-//
-//        DB::commit();
-//
-//        return $tournament;
-//    }
+        $firstRoundMatches = $matches->where('round', $matches->max('round'));
 
-    /**
-     * Retourne les tours d'un tournoi.
-     *
-     * @param Tournament $tournament
-     * @return array
-     */
-    protected function getRounds(Tournament $tournament) : array
-    {
-        return $tournament->matches->pluck('round')->unique()->values()->sort(function ($a, $b) {
-            return $a < $b;
-        })->toArray();
-    }
+        $numberOfSlots = $firstRoundMatches->count() * $tournament->opponents_by_match;
 
-    /**
-     * Place les équipes dans les matchs du tour aléatoirement.
-     *
-     * @param Collection $teams
-     * @param Collection $matches
-     * @param int $numberOfTeamsByMatch
-     * @return void
-     */
-    protected function distribTeamsForRound(Collection $teams, Collection $matches, int $numberOfTeamsByMatch) : void
-    {
-        $numberOfSlots = $matches->count() * $numberOfTeamsByMatch;
+        $teams = $tournament->teams->pad($numberOfSlots, null)->shuffle();
 
-        $teams = $teams->pad($numberOfSlots, null);
+        $teamsChunks = $teams->chunk($tournament->opponents_by_match);
 
-        foreach ($matches as $match) {
-            for ($j = 0; $j < $numberOfTeamsByMatch; $j++) {
-                $index = rand(0, $teams->count() - 1);
-                $team = $teams->pull($index);
-                $match->teams()->attach($team);
-                $teams = $teams->values();
-            }
+        foreach ($firstRoundMatches as $chunk => $match) {
+            $match->teams()->attach($teamsChunks->get($chunk)->pluck('id')->filter());
         }
     }
 

@@ -32,9 +32,9 @@ Route::get('rumble', function () {
 
     $tournament = new \App\Models\Tournament([
         'name' => 'NGC #49',
-        'slots' => 15,
-        'opponents_by_match' => 2,
-        'winners_by_match' => 1,
+        'slots' => 16,
+        'opponents_by_match' => 4,
+        'winners_by_match' => 2,
     ]);
 
     $tournament->save();
@@ -48,4 +48,9 @@ Route::get('rumble', function () {
 
     app(\App\Services\Tournament\TournamentService::class)->init($tournament);
 
+    foreach ($tournament->matches as $match) {
+        dump(
+            sprintf("%s, équipes : %s", $match->name,  $match->teams->pluck('name')->join(' vs '))
+        );
+    }
 });
