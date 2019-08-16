@@ -11,6 +11,8 @@
 |
 */
 
+use App\Models\Team;
+
 Auth::routes();
 
 Route::get('/', 'TournamentsController@index')->name('tournaments.index');
@@ -18,9 +20,9 @@ Route::get('/history', 'TournamentsController@history')->name('tournaments.histo
 
 Route::middleware('admin')->group(function () {
     Route::resource('tournaments', 'TournamentsController')->except(['index', 'show']);
+    Route::patch('tournaments/{tournament}/launch', 'TournamentsController@launch')->name('tournaments.launch');
 });
 
 Route::middleware('auth')->group(function () {
    Route::resource('tournaments', 'TournamentsController')->only('show');
 });
-

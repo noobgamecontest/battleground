@@ -10,6 +10,18 @@
                         <li># {{ $tournament->id }}</li>
                     </ul>
                 </div>
+                @admin
+                    <div class="card-footer">
+                        <a class="btn btn-primary" href="{{ route('tournaments.launch', $tournament) }}" onclick="event.preventDefault(); document.getElementById('tournament-launch').submit();">
+                            {{ __('Lancer') }}
+                        </a>
+
+                        <form id="tournament-launch" action="{{ route('tournaments.launch', $tournament) }}" method="POST" style="display: none;">
+                            @method('patch')
+                            @csrf
+                        </form>
+                    </div>
+                @endadmin
             </div>
         </div>
     </div>

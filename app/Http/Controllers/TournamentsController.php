@@ -5,9 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Tournament;
 use App\Http\Requests\EditTournamentRequest;
 use App\Http\Requests\CreateTournamentRequest;
+use App\Services\Tournament\TournamentService;
 
 class TournamentsController extends Controller
 {
+    /**
+     * @var \App\Services\Tournament\TournamentService
+     */
+    protected $service;
+
+    /**
+     * TournamentsController constructor.
+     *
+     * @param \App\Services\Tournament\TournamentService $service
+     */
+    public function __construct(TournamentService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -103,5 +119,18 @@ class TournamentsController extends Controller
         $tournament->delete();
 
         return redirect()->route('tournaments.index');
+    }
+
+    /**
+     * Démarre un tournoi
+     *
+     * @param \App\Models\Tournament $tournament
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function launch(Tournament $tournament)
+    {
+        $this->service->launch($tournament);
+
+        return redirect()->route('tournaments.show', $tournament);
     }
 }
