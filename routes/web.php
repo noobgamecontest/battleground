@@ -20,37 +20,9 @@ Route::get('/history', 'TournamentsController@history')->name('tournaments.histo
 
 Route::middleware('admin')->group(function () {
     Route::resource('tournaments', 'TournamentsController')->except(['index', 'show']);
+    Route::patch('tournaments/{tournament}/launch', 'TournamentsController@launch')->name('tournaments.launch');
 });
 
 Route::middleware('auth')->group(function () {
    Route::resource('tournaments', 'TournamentsController')->only('show');
-});
-
-Route::get('rumble', function () {
-
-    \DB::beginTransaction();
-
-    $tournament = new \App\Models\Tournament([
-        'name' => 'NGC #49',
-        'slots' => 16,
-        'opponents_by_match' => 4,
-        'winners_by_match' => 2,
-    ]);
-
-    $tournament->save();
-
-    $teams = new \Illuminate\Support\Collection(range(1, $tournament->slots));
-    $teams->map(function ($player) {
-        return new \App\Models\Team(['name' => "Team $player"]);
-    })->each(function ($team) use ($tournament) {
-        $tournament->teams()->save($team);
-    });
-
-    app(\App\Services\Tournament\TournamentService::class)->init($tournament);
-
-    foreach ($tournament->matches as $match) {
-        dump(
-            sprintf("%s, équipes : %s", $match->name,  $match->teams->pluck('name')->join(' vs '))
-        );
-    }
 });

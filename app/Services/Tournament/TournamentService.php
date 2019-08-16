@@ -12,7 +12,7 @@ class TournamentService
      *
      * @param Tournament $tournament
      */
-    public function init(Tournament $tournament) : void
+    public function launch(Tournament $tournament) : void
     {
         $this->buildTree($tournament);
         $this->distribTeamsForFirstRound($tournament);

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Team;
 use App\Models\Tournament;
 use App\Models\User;
 use Tests\TestCase;
@@ -96,5 +97,24 @@ class TournamentsControllerTest extends TestCase
         $response->assertRedirect('/');
 
         $this->assertDatabaseMissing('tournaments', ['id' => $tournament->id]);
+    }
+
+    /** @test */
+    public function admin_can_launch_one()
+    {
+        $admin = factory(User::class)->state('admin')->create();
+        $tournament = factory(Tournament::class)->create([
+            'name' => 'NGC #49',
+            'slots' => 16,
+            'opponents_by_match' => 4,
+            'winners_by_match' => 2,
+        ]);
+        $tournament->teams()->saveMany(factory(Team::class, 15)->make());
+
+        $response = $this->actingAs($admin)->patch('tournaments/' . $tournament->id . '/launch');
+
+        $response->assertRedirect('tournaments/'. $tournament->id);
+
+        $this->assertDatabaseHas('matches', ['tournament_id' => $tournament->id]);
     }
 }

@@ -26,7 +26,7 @@ class TournamentServiceTest extends TestCase
 
         $service = new TournamentService();
 
-        $service->init($tournament);
+        $service->launch($tournament);
 
         $this->assertEquals(3, $tournament->matches->count());
         $this->assertEquals(1, $tournament->matches->max('round'));
