@@ -25,6 +25,6 @@ class RegistrationTest extends TestCase
                 
         array_splice($userInformations, 2, 2);
         
-        $this->assertDatabaseHas('users', $userInformations);
+        $this->assertDatabaseHas('users', $userInformations + ['active' => true]);
     }
 }
