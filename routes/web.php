@@ -1,5 +1,5 @@
 <?php
-
+auth()->loginUsingId(1);
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,4 +25,9 @@ Route::middleware('admin')->group(function () {
 
 Route::middleware('auth')->group(function () {
    Route::resource('tournaments', 'TournamentsController')->only('show');
+});
+
+Route::get('form', function (\App\Services\ResultService $resultService) {
+    $matches = $resultService->getMatchs();
+    return view('form', compact('matches'));
 });
