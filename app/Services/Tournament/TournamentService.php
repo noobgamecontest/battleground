@@ -11,9 +11,14 @@ class TournamentService
      * Démarre un Tournoi
      *
      * @param Tournament $tournament
+     * @throws TournamentNotReadyException
      */
     public function launch(Tournament $tournament) : void
     {
+        if (! $tournament->readyToLaunch()) {
+            throw new TournamentNotReadyException();
+        }
+
         $this->buildTree($tournament);
         $this->distribTeamsForFirstRound($tournament);
     }

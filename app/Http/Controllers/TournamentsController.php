@@ -3,25 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tournament;
+use App\Services\Message\MessageService;
 use App\Http\Requests\EditTournamentRequest;
 use App\Http\Requests\CreateTournamentRequest;
 use App\Services\Tournament\TournamentService;
+use App\Services\Tournament\TournamentNotReadyException;
 
 class TournamentsController extends Controller
 {
     /**
      * @var \App\Services\Tournament\TournamentService
      */
-    protected $service;
+    protected $tournamentService;
+
+    /**
+     * @var MessageService
+     */
+    protected $messageService;
 
     /**
      * TournamentsController constructor.
      *
-     * @param \App\Services\Tournament\TournamentService $service
+     * @param TournamentService $tournamentService
      */
-    public function __construct(TournamentService $service)
+    public function __construct(TournamentService $tournamentService, MessageService $messageService)
     {
-        $this->service = $service;
+        $this->tournamentService = $tournamentService;
+        $this->messageService = $messageService;
     }
 
     /**
@@ -126,10 +134,17 @@ class TournamentsController extends Controller
      *
      * @param \App\Models\Tournament $tournament
      * @return \Illuminate\Http\RedirectResponse
+     * @throws \App\Services\Message\UnexpectedMessageTypeException
      */
     public function launch(Tournament $tournament)
     {
-        $this->service->launch($tournament);
+        try {
+            $this->tournamentService->launch($tournament);
+
+            $this->messageService->set('info', 'Le tournoi a été lancé.');
+        } catch (TournamentNotReadyException $e) {
+            $this->messageService->set('danger', 'Le tournoi ne peut être lancé, il manque des équipes ou il a déjà été lancé.');
+        }
 
         return redirect()->route('tournaments.show', $tournament);
     }
