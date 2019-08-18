@@ -38,6 +38,6 @@ class Tournament extends Model
      */
     public function readyToLaunch() : bool
     {
-        return $this->teams()->count() && ! $this->matches()->count();
+        return $this->teams()->count() >= $this->opponents_by_match && ! $this->matches()->count();
     }
 }

@@ -28,13 +28,15 @@ class TournamentTest extends TestCase
     }
 
     /** @test */
-    public function not_ready_because_no_teams_subscribes()
+    public function not_ready_because_no_sufficient_teams_subscribes()
     {
         $tournament = factory(Tournament::class)->create([
-            'slots' => 4,
-            'opponents_by_match' => 2,
+            'slots' => 8,
+            'opponents_by_match' => 4,
             'winners_by_match' => 1,
         ]);
+
+        $tournament->teams()->saveMany(factory(Team::class, 2)->make());
 
         $this->assertFalse($tournament->readyToLaunch());
     }
