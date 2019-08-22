@@ -4,46 +4,32 @@ namespace App\Services;
 
 use App\Models\Tournament;
 
-class Bag
-{
-    /**
-     * @var \Illuminate\Support\Collection
-     */
-    protected $bag;
-
-    public function __construct($round)
-    {
-
-    }
-}
-
 class ResultService
 {
-    public function getMatchs()
+    /**
+     * @param \App\Models\Tournament $tournament
+     * @return mixed
+     */
+    public function getMatchs(Tournament $tournament)
     {
-        $tournement = $this->getTrounament();
+        $matchesByRound = $tournament->matches->groupBy('round');
 
-        $matchesByRound = $tournement->matches->groupBy('round');
-
-        return $matchesByRound->map(function ($matchs) {
-
+        $l = $matchesByRound->map(function ($matchs) {
             return $matchs->map(function ($match) {
                 $std = new \stdClass();
+                $std->id = $match->id;
                 $std->name = $match->name;
-                $std->type = 'versus';
                 $std->status = $match->status;
                 $std->teams = $match->teams()->select('id', 'name')->get()->toArray();
 
                 return $std;
             });
         });
-    }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static|static[]
-     */
-    protected function getTrounament()
-    {
-        return Tournament::with('matches')->findOrFail(1);
+        $st = new \stdClass();
+        $st->tounamentId = $tournament->id;
+        $st->rounds = $l;
+
+        return $st;
     }
 }
