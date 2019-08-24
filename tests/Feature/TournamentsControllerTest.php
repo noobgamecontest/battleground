@@ -176,10 +176,12 @@ class TournamentsControllerTest extends TestCase
     /** @test */
     public function user_cant_subscribe_to_a_specific_tournament_with_max_slots()
     {
-        $tournament = factory(Tournament::class)->create();
+        $tournament = factory(Tournament::class)->create([
+            'slots' => 4,
+        ]);
         $user = factory(User::class)->create();
 
-        factory(Team::class, 16)->create([
+        factory(Team::class, 4)->create([
             'tournament_id' => $tournament->id,
         ]);
 
