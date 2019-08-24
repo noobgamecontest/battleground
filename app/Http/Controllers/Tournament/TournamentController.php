@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Tournament;
 
 use App\Models\Tournament;
 use Illuminate\Http\Request;
-use App\Services\TeamService;
 use App\Services\TournamentService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SubscribeRequest;
+use App\Exceptions\Tournament\SubscribeException;
 
 class TournamentController extends Controller
 {
@@ -17,21 +17,14 @@ class TournamentController extends Controller
     protected $tournamentService;
 
     /**
-     * @var \App\Services\TeamService
-     */
-    protected $teamService;
-
-    /**
      * Create a new controller instance.
      *
      * @param \App\Services\TournamentService $tournamentService
-     * @param \App\Services\TeamService $teamService
      * @return void
      */
-    public function __construct(TournamentService $tournamentService, TeamService $teamService)
+    public function __construct(TournamentService $tournamentService)
     {
         $this->tournamentService = $tournamentService;
-        $this->teamService = $teamService;
     }
 
     /**
@@ -69,10 +62,15 @@ class TournamentController extends Controller
     {
         $tournament = Tournament::find($request->get('tournamentId'));
 
-        $this->tournamentService->subscribe($tournament, $request->get('teamName'));
+        try {
+            $this->tournamentService->subscribe($request->all());
 
-        $request->session()->flash('alert-success', trans('layouts.tournaments.subscribe.success'));
-        return redirect()->route('tournament.show', $tournament->id);
+            $request->session()->flash('alert-success', trans('layouts.tournaments.subscribe.success'));
+            return redirect()->route('tournament.show', $tournament->id);
+        } catch (SubscribeException $e) {
+            $request->session()->flash('alert-danger', trans('layouts.tournaments.subscribe.error'));
+            return redirect()->route('tournament.show', $tournament->id);
+        }
     }
 
     /**
@@ -81,11 +79,11 @@ class TournamentController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function deleteTeam(Request $request)
+    public function unsubscribe(Request $request)
     {
-        $this->teamService->delete($request->get('teamId'));
+        $this->tournamentService->unsubscribe($request->get('teamId'));
 
-        $request->session()->flash('alert-success', trans('layouts.tournaments.deleteTeam.success'));
+        $request->session()->flash('alert-success', trans('layouts.tournaments.unsubscribe.success'));
         return redirect()->back();
     }
 }

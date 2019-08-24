@@ -23,5 +23,5 @@ Route::prefix('tournament')->namespace('Tournament')->group(function () {
     Route::get('/', 'TournamentController@index')->name('tournament.index');
     Route::get('/show/{id}', 'TournamentController@show')->name('tournament.show');
     Route::post('/subscribe', 'TournamentController@subscribe')->name('tournament.subscribe');
-    Route::post('/deleteTeam', 'TournamentController@deleteTeam')->name('tournament.deleteTeam')->middleware('auth', 'admin');
+    Route::post('/unsubscribe', 'TournamentController@unsubscribe')->name('tournament.unsubscribe')->middleware('auth', 'admin');
 });

@@ -80,7 +80,7 @@ class UserRoleTest extends TestCase
             'tournament_id' => $tournament->id
         ]);
 
-        $response = $this->post('tournament/deleteTeam', ['teamId' => $team->id]);
+        $response = $this->post('tournament/unsubscribe', ['teamId' => $team->id]);
         $response->assertRedirect('/login');
     }
 
@@ -95,7 +95,7 @@ class UserRoleTest extends TestCase
             'tournament_id' => $tournament->id
         ]);
 
-        $response = $this->actingAs($user)->post('tournament/deleteTeam', ['teamId' => $team->id]);
+        $response = $this->actingAs($user)->post('tournament/unsubscribe', ['teamId' => $team->id]);
         $response->assertStatus(403);
     }
 
@@ -110,7 +110,7 @@ class UserRoleTest extends TestCase
             'tournament_id' => $tournament->id
         ]);
 
-        $response = $this->actingAs($user)->post('tournament/deleteTeam', ['teamId' => $team->id]);
+        $response = $this->actingAs($user)->post('tournament/unsubscribe', ['teamId' => $team->id]);
 
         $response->assertStatus(302);
         $response->assertSessionHas(['alert-success' => 'Team was successful deleted']);

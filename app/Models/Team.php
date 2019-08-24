@@ -12,7 +12,7 @@ class Team extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'position'
+        'name', 'position',
     ];
 
     /**

@@ -40,7 +40,7 @@
                                         <td>{{ $team->name }}</td>
                                         @if (Auth::check() && Auth::user()->isAdmin())
                                             <td>
-                                                <form method="post" action="{{ route('tournament.deleteTeam') }}">
+                                                <form method="post" action="{{ route('tournament.unsubscribe') }}">
                                                     @csrf
                                                     <input type="hidden" name="teamId" value="{{ $team->id }}">
                                                     <button type="submit" class="btn btn-danger mb-2">@lang('layouts.common.delete')</button>
