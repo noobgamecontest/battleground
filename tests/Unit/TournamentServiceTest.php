@@ -3,49 +3,47 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
+use App\Models\Team;
 use App\Models\Tournament;
-use App\Services\TournamentService;
 use Illuminate\Foundation\Testing\WithFaker;
+use App\Services\Tournament\TournamentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class TournamentServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @var \App\Services\TournamentService $service
-     */
-    protected $service;
-
-    /**
-     * Setting up the test
-     */
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->service = new TournamentService();
-    }
-
     /** @test */
-    public function canFindSpecificTournament()
+    public function can_get_all_of_the_availables_tournaments()
     {
-        $tournament = factory(Tournament::class)->create();
-
-        $find = $this->service->find($tournament->id);
-
-        $this->assertInstanceOf(Tournament::class, $find);
-        $this->assertEquals($find->id, $tournament->id);
-    }
-
-    /** @test */
-    public function canGetAllAvailableTournament()
-    {
+        $service = new TournamentService();
         factory(Tournament::class, 5)->create();
 
-        $tournaments = $this->service->getAllAvailables();
+        $tournaments = $service->getAllAvailables();
 
         $this->assertNotEmpty($tournaments);
         $this->assertInstanceOf(Tournament::class, $tournaments->first());
+    }
+
+    /** @test */
+    public function can_init_a_tournament_with_4_slots_and_2_teams_by_match_with_1_winner()
+    {
+        $tournament = factory(Tournament::class)->create([
+            'slots' => 4,
+            'opponents_by_match' => 2,
+            'winners_by_match' => 1,
+        ]);
+
+        $tournament->teams()->saveMany(factory(Team::class, 4)->make());
+
+        $service = new TournamentService();
+
+        $service->launch($tournament);
+
+        $this->assertEquals(3, $tournament->matches->count());
+        $this->assertEquals(1, $tournament->matches->max('round'));
+        $this->assertEquals(2, $tournament->matches->get(0)->teams->count());
+        $this->assertEquals(2, $tournament->matches->get(1)->teams->count());
+        $this->assertEquals(0, $tournament->matches->get(2)->teams->count());
     }
 }

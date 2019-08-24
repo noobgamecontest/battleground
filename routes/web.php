@@ -11,17 +11,20 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::middleware('admin')->namespace('Tournament')->group(function () {
+    Route::resource('tournaments', 'TournamentsController')->except(['index', 'show']);
+    Route::patch('tournaments/{tournament}/launch', 'TournamentsController@launch')->name('tournaments.launch');
+});
 
-Route::prefix('tournament')->namespace('Tournament')->group(function () {
-    Route::get('/', 'TournamentController@index')->name('tournament.index');
-    Route::get('/show/{id}', 'TournamentController@show')->name('tournament.show');
-    Route::post('/subscribe', 'TournamentController@subscribe')->name('tournament.subscribe');
-    Route::post('/unsubscribe', 'TournamentController@unsubscribe')->name('tournament.unsubscribe')->middleware('auth', 'admin');
+Route::middleware('auth')->namespace('Tournament')->group(function () {
+    Route::resource('tournaments', 'TournamentsController')->only('show');
+    Route::post('/tournaments/subscribe', 'TournamentsController@subscribe')->name('tournaments.subscribe');
+    Route::post('/tournaments/unsubscribe', 'TournamentsController@unsubscribe')->name('tournaments.unsubscribe');
+});
+
+Route::prefix('tournaments')->namespace('Tournament')->group(function () {
+    Route::get('/', 'TournamentsController@index')->name('tournaments.index');
+    Route::get('/history', 'TournamentsController@history')->name('tournaments.history');
 });

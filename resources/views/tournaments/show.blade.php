@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-md-12">
                 @include('layouts.flash')
                 <div class="card">
                     <div class="card-header">
@@ -11,7 +11,7 @@
                         <h4>@lang('layouts.tournaments.show.begin', ['date' => $tournament->started_at])</h4>
                     </div>
                     <div class="card-body">
-                        <form class="form-inline" method="post" action="{{ route('tournament.subscribe') }}">
+                        <form class="form-inline" method="post" action="{{ route('tournaments.subscribe') }}">
                             @csrf
                             <input type="hidden" name="tournamentId" value="{{ $tournament->id }}">
                             <div class="form-group mx-sm-3 mb-2">
@@ -38,21 +38,35 @@
                                     <tr>
                                         <td>{{ $team->id }}</td>
                                         <td>{{ $team->name }}</td>
-                                        @if (Auth::check() && Auth::user()->isAdmin())
+                                        @admin
                                             <td>
-                                                <form method="post" action="{{ route('tournament.unsubscribe') }}">
+                                                <form method="post" action="{{ route('tournaments.unsubscribe') }}">
                                                     @csrf
                                                     <input type="hidden" name="teamId" value="{{ $team->id }}">
                                                     <button type="submit" class="btn btn-danger mb-2">@lang('layouts.common.delete')</button>
                                                 </form>
                                             </td>
-                                        @endif
+                                        @endadmin
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
+                @admin
+                @if ($tournament->readyToLaunch())
+                    <div class="card-footer">
+                        <a class="btn btn-primary" href="{{ route('tournaments.launch', $tournament) }}" onclick="event.preventDefault(); document.getElementById('tournament-launch').submit();">
+                            {{ __('Lancer') }}
+                        </a>
+
+                        <form id="tournament-launch" action="{{ route('tournaments.launch', $tournament) }}" method="POST" style="display: none;">
+                            @method('patch')
+                            @csrf
+                        </form>
+                    </div>
+                @endif
+                @endadmin
             </div>
         </div>
     </div>

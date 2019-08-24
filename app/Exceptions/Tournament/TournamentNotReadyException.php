@@ -4,6 +4,6 @@ namespace App\Exceptions\Tournament;
 
 use Exception;
 
-class SubscribeException extends Exception
+class TournamentNotReadyException extends Exception
 {
 }
