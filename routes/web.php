@@ -16,12 +16,12 @@ Auth::routes();
 Route::middleware('admin')->namespace('Tournament')->group(function () {
     Route::resource('tournaments', 'TournamentsController')->except(['index', 'show']);
     Route::patch('tournaments/{tournament}/launch', 'TournamentsController@launch')->name('tournaments.launch');
+    Route::post('tournaments/unsubscribe', 'TournamentsController@unsubscribe')->name('tournaments.unsubscribe');
 });
 
 Route::middleware('auth')->namespace('Tournament')->group(function () {
     Route::resource('tournaments', 'TournamentsController')->only('show');
-    Route::post('/tournaments/subscribe', 'TournamentsController@subscribe')->name('tournaments.subscribe');
-    Route::post('/tournaments/unsubscribe', 'TournamentsController@unsubscribe')->name('tournaments.unsubscribe');
+    Route::post('tournaments/subscribe', 'TournamentsController@subscribe')->name('tournaments.subscribe');
 });
 
 Route::prefix('tournaments')->namespace('Tournament')->group(function () {

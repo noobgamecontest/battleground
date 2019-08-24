@@ -7,7 +7,7 @@ return [
         'subscribe' => 'Inscription',
         'register' => 'Enregistrer',
         'action' => 'Action',
-        'number' => 'Nombre',
+        'id' => 'Identifiant',
         'teams' => 'Equipe',
         'team_name' => "Nom d'équipe",
         'delete' => 'Supprimer',

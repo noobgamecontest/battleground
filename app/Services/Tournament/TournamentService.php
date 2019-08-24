@@ -9,7 +9,6 @@ use App\Models\Tournament;
 use Illuminate\Database\Eloquent\Collection;
 use App\Exceptions\Tournament\SubscribeException;
 use App\Exceptions\Tournament\TournamentNotReadyException;
-use phpDocumentor\Reflection\Types\Boolean;
 
 class TournamentService
 {
@@ -173,9 +172,9 @@ class TournamentService
      *
      * @param \App\Models\Tournament $tournament
      * @param string $name
-     * @return mixed
+     * @return boolean
      */
-    protected function checkNameAvailable(Tournament $tournament, string $name)
+    protected function checkNameAvailable(Tournament $tournament, string $name) : bool
     {
         $target = $tournament->teams->where('name', $name);
 
@@ -186,9 +185,9 @@ class TournamentService
      * Check la disponibilité du nom d'équipe
      *
      * @param \App\Models\Tournament $tournament
-     * @return mixed
+     * @return boolean
      */
-    protected function checkSlotsAvailable(Tournament $tournament)
+    protected function checkSlotsAvailable(Tournament $tournament) : bool
     {
         $teams = $tournament->teams->all();
 

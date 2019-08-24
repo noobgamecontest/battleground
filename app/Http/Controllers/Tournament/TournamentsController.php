@@ -50,10 +50,11 @@ class TournamentsController extends Controller
     }
 
     /**
-     * Subscribe a team to a tournament
+     * Inscrit une équipe
      *
-     * @param \App\Http\Requests\SubscribeRequest
+     * @param \App\Http\Requests\SubscribeRequest $request
      * @return \Illuminate\Http\RedirectResponse
+     * @throws \App\Exceptions\Message\UnexpectedMessageTypeException
      */
     public function subscribe(SubscribeRequest $request)
     {
@@ -62,25 +63,26 @@ class TournamentsController extends Controller
         try {
             $this->tournamentService->subscribe($request->all());
 
-            $request->session()->flash('alert-success', trans('layouts.tournaments.subscribe.success'));
-            return redirect()->route('tournaments.show', $tournament->id);
+            $this->messageService->set('success', trans('layouts.tournaments.subscribe.success'));
         } catch (SubscribeException $e) {
-            $request->session()->flash('alert-danger', $e->getMessage());
-            return redirect()->route('tournaments.show', $tournament->id);
+            $this->messageService->set('danger', $e->getMessage());
         }
+
+        return redirect()->route('tournaments.show', $tournament->id);
     }
 
     /**
-     * Delete a team from a tournament
+     * Désincrit une équipe
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
+     * @throws \App\Exceptions\Message\UnexpectedMessageTypeException
      */
     public function unsubscribe(Request $request)
     {
         $this->tournamentService->unsubscribe($request->get('teamId'));
 
-        $request->session()->flash('alert-success', trans('layouts.tournaments.unsubscribe.success'));
+        $this->messageService->set('success', trans('layouts.tournaments.unsubscribe.success'));
         return redirect()->back();
     }
 
@@ -176,7 +178,7 @@ class TournamentsController extends Controller
      *
      * @param \App\Models\Tournament $tournament
      * @return \Illuminate\Http\RedirectResponse
-     * @throws \App\Services\Message\UnexpectedMessageTypeException
+     * @throws \App\Exceptions\Message\UnexpectedMessageTypeException
      */
     public function launch(Tournament $tournament)
     {

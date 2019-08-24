@@ -4,7 +4,6 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-12">
-                @include('layouts.flash')
                 <div class="card">
                     <div class="card-header">
                         <h3>{{ $tournament->name }}</h3>
@@ -26,7 +25,7 @@
                         <table class="table table-striped">
                             <thead>
                             <tr>
-                                <th>@lang('layouts.common.number')</th>
+                                <th>@lang('layouts.common.id')</th>
                                 <th>@lang('layouts.common.teams')</th>
                                 @if (Auth::check() && Auth::user()->isAdmin())
                                     <th>@lang('layouts.common.action')</th>
