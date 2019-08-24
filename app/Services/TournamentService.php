@@ -5,6 +5,7 @@ namespace App\Services;
 use Carbon\Carbon;
 use App\Models\Tournament;
 use Illuminate\Database\Eloquent\Collection;
+use App\Exceptions\Tournament\SubscribeException;
 
 class TournamentService
 {
@@ -24,10 +25,27 @@ class TournamentService
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAllAvailablesTournaments() : Collection
+    public function getAllAvailables() : Collection
     {
         return Tournament::where('started_at', '>', Carbon::now())
             ->whereNull('ended_at')
             ->get();
+    }
+
+    public function subscribe(array $attrs)
+    {
+        $tournament = Tournament::find($attrs['tournamentId']);
+        $target = $tournament->teams->where('name', $attrs['teamName']);
+
+        if ($target->isNotEmpty()) {
+            throw new SubscribeException();
+        }
+
+        
+    }
+
+    public function unsubscribe()
+    {
+
     }
 }

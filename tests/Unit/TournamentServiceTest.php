@@ -43,7 +43,7 @@ class TournamentServiceTest extends TestCase
     {
         factory(Tournament::class, 5)->create();
 
-        $tournaments = $this->service->getAllAvailablesTournaments();
+        $tournaments = $this->service->getAllAvailables();
 
         $this->assertNotEmpty($tournaments);
         $this->assertInstanceOf(Tournament::class, $tournaments->first());

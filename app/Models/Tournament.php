@@ -30,12 +30,4 @@ class Tournament extends Model
     {
         return $this->hasMany(Match::class);
     }
-
-    /**
-     * Get the registrations for the tournament.
-     */
-    public function registrations()
-    {
-        return $this->hasMany(Registration::class);
-    }
 }
