@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\Services\Message\Message;
-use App\Exceptions\Message\UnexpectedMessageTypeException;
+use App\Services\Message\UnexpectedMessageTypeException;
 
 class MessageTest extends TestCase
 {

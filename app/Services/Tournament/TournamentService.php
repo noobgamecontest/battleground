@@ -2,39 +2,23 @@
 
 namespace App\Services\Tournament;
 
-use Carbon\Carbon;
 use App\Models\Team;
 use App\Models\Match;
 use App\Models\Tournament;
-use Illuminate\Database\Eloquent\Collection;
-use App\Exceptions\Tournament\SubscribeException;
-use App\Exceptions\Tournament\TournamentNotReadyException;
 
 class TournamentService
 {
     /**
-     * Return all availables tournaments
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getAllAvailables() : Collection
-    {
-        return Tournament::where('started_at', '>', Carbon::now())
-            ->whereNull('ended_at')
-            ->get();
-    }
-
-    /**
      * Inscriptions d'une équipe à un tournoi
      *
-     * @param array $attrs
-     * @throws \App\Exceptions\Tournament\SubscribeException
+     * @param \App\Models\Tournament $tournament
+     * @param string $name
      * @return void
+     * @throws \App\Services\Tournament\SubscribeException
      */
-    public function subscribe(array $attrs) : void
+    public function subscribe(Tournament $tournament, string $name) : void
     {
-        $tournament = Tournament::find($attrs['tournamentId']);
-        $nameAvailable = $this->checkNameAvailable($tournament, $attrs['teamName']);
+        $nameAvailable = $this->checkNameAvailable($tournament, $name);
 
         if (! $nameAvailable) {
             throw new SubscribeException(trans('layouts.tournaments.subscribe.error.name_exists'));
@@ -47,7 +31,7 @@ class TournamentService
         }
 
         $team = new Team([
-            'name' => $attrs['teamName'],
+            'name' => $name,
         ]);
 
         $tournament->teams()->save($team);
@@ -56,14 +40,13 @@ class TournamentService
     /**
      * Supprime une équipe d'un tournoi
      *
-     * @param $id
+     * @param \App\Models\Tournament $tournament
+     * @param int $id
      * @return void
      */
-    public function unsubscribe($id) : void
+    public function unsubscribe(Tournament $tournament, int $id) : void
     {
-        $team = Team::find($id);
-
-        $team->delete();
+        $tournament->teams()->where('id', $id)->delete();
     }
 
     /**

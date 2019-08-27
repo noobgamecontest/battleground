@@ -10,8 +10,8 @@ use App\Services\Message\MessageService;
 use App\Http\Requests\EditTournamentRequest;
 use App\Http\Requests\CreateTournamentRequest;
 use App\Services\Tournament\TournamentService;
-use App\Exceptions\Tournament\SubscribeException;
-use App\Exceptions\Tournament\TournamentNotReadyException;
+use App\Services\Tournament\SubscribeException;
+use App\Services\Tournament\TournamentNotReadyException;
 
 class TournamentsController extends Controller
 {
@@ -44,7 +44,7 @@ class TournamentsController extends Controller
      */
     public function index()
     {
-        $tournaments = $this->tournamentService->getAllAvailables();
+        $tournaments = Tournament::all();
 
         return view('tournaments.index', ['tournaments' => $tournaments]);
     }
@@ -52,16 +52,14 @@ class TournamentsController extends Controller
     /**
      * Inscrit une équipe
      *
+     * @param \App\Models\Tournament $tournament
      * @param \App\Http\Requests\SubscribeRequest $request
      * @return \Illuminate\Http\RedirectResponse
-     * @throws \App\Exceptions\Message\UnexpectedMessageTypeException
      */
-    public function subscribe(SubscribeRequest $request)
+    public function subscribe(Tournament $tournament, SubscribeRequest $request)
     {
-        $tournament = Tournament::find($request->get('tournamentId'));
-
         try {
-            $this->tournamentService->subscribe($request->all());
+            $this->tournamentService->subscribe($tournament, $request->get('teamName'));
 
             $this->messageService->set('success', trans('layouts.tournaments.subscribe.success'));
         } catch (SubscribeException $e) {
@@ -76,13 +74,13 @@ class TournamentsController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
-     * @throws \App\Exceptions\Message\UnexpectedMessageTypeException
      */
     public function unsubscribe(Request $request)
     {
         $this->tournamentService->unsubscribe($request->get('teamId'));
 
         $this->messageService->set('success', trans('layouts.tournaments.unsubscribe.success'));
+
         return redirect()->back();
     }
 
@@ -178,7 +176,6 @@ class TournamentsController extends Controller
      *
      * @param \App\Models\Tournament $tournament
      * @return \Illuminate\Http\RedirectResponse
-     * @throws \App\Exceptions\Message\UnexpectedMessageTypeException
      */
     public function launch(Tournament $tournament)
     {

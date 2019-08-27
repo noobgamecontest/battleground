@@ -23,7 +23,7 @@ class TournamentsControllerTest extends TestCase
             'ended_at' => null,
         ]);
 
-        $response = $this->get('/tournaments');
+        $response = $this->get('/');
 
         $response->assertSeeText($tournaments->first()->name);
         $response->assertSeeText($tournaments->last()->name);
@@ -51,18 +51,18 @@ class TournamentsControllerTest extends TestCase
 
         $response->assertSeeText("Création d'un tournoi");
         $response->assertStatus(200);
-        
+
         $properties = [
             'name' => 'Easy Contest',
             'slots' => 4,
             'opponents_by_match' => 2,
-            'winners_by_match' => 1,            
+            'winners_by_match' => 1,
         ];
 
         $response = $this->actingAs($admin)->post('tournaments', $properties);
-        
+
         $response->assertRedirect('tournaments/1');
-        
+
         $this->assertDatabaseHas('tournaments', $properties);
     }
 
@@ -99,7 +99,7 @@ class TournamentsControllerTest extends TestCase
 
         $response = $this->actingAs($admin)->delete('tournaments/' . $tournament->id);
 
-        $response->assertRedirect('/tournaments');
+        $response->assertRedirect('/');
 
         $this->assertDatabaseMissing('tournaments', ['id' => $tournament->id]);
     }
@@ -186,11 +186,11 @@ class TournamentsControllerTest extends TestCase
         ]);
 
         $params = [
-            'tournamentId' => $tournament->id,
+//            'tournamentId' => $tournament->id,
             'teamName' => 'NameTest',
         ];
 
-        $response = $this->actingAs($user)->post('tournaments/subscribe', $params);
+        $response = $this->actingAs($user)->post('tournaments/' . $tournament->id . '/subscribe', $params);
         $response->assertRedirect('tournaments/'. $tournament->id);
 
         $message = new Message('danger', "Toutes les places sont déjà occupées pour ce tournois");
