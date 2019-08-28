@@ -41,12 +41,12 @@ class TournamentService
      * Supprime une équipe d'un tournoi
      *
      * @param \App\Models\Tournament $tournament
-     * @param int $id
+     * @param \App\Models\Team $team
      * @return void
      */
-    public function unsubscribe(Tournament $tournament, int $id) : void
+    public function unsubscribe(Tournament $tournament, Team $team) : void
     {
-        $tournament->teams()->where('id', $id)->delete();
+        $tournament->teams()->where('id', $team->id)->delete();
     }
 
     /**

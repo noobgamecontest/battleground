@@ -18,10 +18,10 @@ Route::namespace('Tournament')->group(function () {
     Route::get('/history', 'TournamentsController@history')->name('tournaments.history');
 });
 
-Route::middleware('admin')->group(function () {
+Route::middleware('admin')->namespace('Tournament')->group(function () {
     Route::resource('tournaments', 'TournamentsController')->except(['index', 'show']);
     Route::patch('tournaments/{tournament}/launch', 'TournamentsController@launch')->name('tournaments.launch');
-    Route::post('tournaments/{tournament}/unsubscribe', 'TournamentsController@unsubscribe')->name('tournaments.unsubscribe');
+    Route::patch('tournaments/{tournament}/unsubscribe/{team}', 'TournamentsController@unsubscribe')->name('tournaments.unsubscribe');
 });
 
 Route::middleware('auth')->namespace('Tournament')->group(function () {

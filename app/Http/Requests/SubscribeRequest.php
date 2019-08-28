@@ -24,7 +24,6 @@ class SubscribeRequest extends FormRequest
     public function rules()
     {
         return [
-            'tournamentId' => 'required|integer',
             'teamName' => 'required|string',
         ];
     }

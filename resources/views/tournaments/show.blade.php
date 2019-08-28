@@ -10,7 +10,7 @@
                         <h4>@lang('layouts.tournaments.show.begin', ['date' => $tournament->started_at])</h4>
                     </div>
                     <div class="card-body">
-                        <form class="form-inline" method="post" action="{{ route('tournaments.subscribe') }}">
+                        <form class="form-inline" method="post" action="{{ route('tournaments.subscribe', $tournament) }}">
                             @csrf
                             <input type="hidden" name="tournamentId" value="{{ $tournament->id }}">
                             <div class="form-group mx-sm-3 mb-2">
@@ -39,7 +39,7 @@
                                         <td>{{ $team->name }}</td>
                                         @admin
                                             <td>
-                                                <form method="post" action="{{ route('tournaments.unsubscribe') }}">
+                                                <form method="post" action="{{ route('tournaments.unsubscribe', [$tournament, $team]) }}">
                                                     @csrf
                                                     <input type="hidden" name="teamId" value="{{ $team->id }}">
                                                     <button type="submit" class="btn btn-danger mb-2">@lang('layouts.common.delete')</button>

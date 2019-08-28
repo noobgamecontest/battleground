@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Tournament;
 
+use App\Models\Team;
 use App\Models\Tournament;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -72,12 +73,13 @@ class TournamentsController extends Controller
     /**
      * Désincrit une équipe
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Tournament $tournament
+     * @param \App\Models\Team $team
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function unsubscribe(Request $request)
+    public function unsubscribe(Tournament $tournament, Team $team)
     {
-        $this->tournamentService->unsubscribe($request->get('teamId'));
+        $this->tournamentService->unsubscribe($tournament, $team);
 
         $this->messageService->set('success', trans('layouts.tournaments.unsubscribe.success'));
 

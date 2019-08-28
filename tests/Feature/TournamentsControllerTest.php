@@ -127,25 +127,17 @@ class TournamentsControllerTest extends TestCase
     public function user_can_subscribe_to_a_specific_tournament()
     {
         $user = factory(User::class)->create();
-        $tournament = factory(Tournament::class)->create();
-
-        $response = $this->actingAs($user)->get('tournaments/' . $tournament->id);
-
-        $response->assertStatus(200);
-        $response->assertSee($tournament->name);
-
-        $teamName = md5(time());
+        $tournament = factory(Tournament::class)->create(['slots' => 5]);
 
         $params = [
-            'tournamentId' => $tournament->id,
-            'teamName' => $teamName,
+            'teamName' => 'Yolo Swag',
         ];
 
-        $response = $this->actingAs($user)->post('tournaments/subscribe', $params);
+        $response = $this->actingAs($user)->post('tournaments/' . $tournament->id . '/subscribe', $params);
         $response->assertStatus(302);
 
         $this->assertDatabaseHas('teams', [
-            'name' => $teamName,
+            'name' => $params['teamName'],
             'tournament_id' => $tournament->id,
         ]);
     }
@@ -153,20 +145,20 @@ class TournamentsControllerTest extends TestCase
     /** @test */
     public function user_cant_subscribe_to_a_specific_tournament_with_existing_team_name()
     {
-        $tournament = factory(Tournament::class)->create();
         $user = factory(User::class)->create();
+        $tournament = factory(Tournament::class)->create(['slots' => 4]);
 
-        factory(Team::class)->create([
-            'name' => 'NameTest',
-            'tournament_id' => $tournament->id
+        $existingTeam = factory(Team::class)->make([
+            'name' => 'Already take',
         ]);
 
+        $tournament->teams()->save($existingTeam);
+
         $params = [
-            'tournamentId' => $tournament->id,
-            'teamName' => 'NameTest',
+            'teamName' => $existingTeam->name,
         ];
 
-        $response = $this->actingAs($user)->post('tournaments/subscribe', $params);
+        $response = $this->actingAs($user)->post('tournaments/' . $tournament->id . '/subscribe', $params);
         $response->assertRedirect('tournaments/'. $tournament->id);
 
         $message = new Message('danger', "Ce nom d'équipe existe déjà");
@@ -176,17 +168,17 @@ class TournamentsControllerTest extends TestCase
     /** @test */
     public function user_cant_subscribe_to_a_specific_tournament_with_max_slots()
     {
-        $tournament = factory(Tournament::class)->create([
-            'slots' => 4,
-        ]);
         $user = factory(User::class)->create();
 
-        factory(Team::class, 4)->create([
-            'tournament_id' => $tournament->id,
+        $tournament = factory(Tournament::class)->create([
+            'slots' => 4,
+            'opponents_by_match' => 2,
+            'winners_by_match' => 1,
         ]);
 
+        $tournament->teams()->saveMany(factory(Team::class, 4)->make());
+
         $params = [
-//            'tournamentId' => $tournament->id,
             'teamName' => 'NameTest',
         ];
 
@@ -200,18 +192,24 @@ class TournamentsControllerTest extends TestCase
     /** @test */
     public function an_admin_can_delete_team()
     {
-        $user = factory(User::class)->state('admin')->create();
+        $admin = factory(User::class)->state('admin')->create();
+        $tournament = factory(Tournament::class)->create(['slots' => 4]);
 
-        $tournament = factory(Tournament::class)->create();
-        $team = factory(Team::class)->create([
-            'name' => 'NameTest',
-            'tournament_id' => $tournament->id
+        $team = factory(Team::class)->make([
+            'name' => 'Already take',
         ]);
 
-        $response = $this->actingAs($user)->post('tournaments/unsubscribe', ['teamId' => $team->id]);
+        $tournament->teams()->save($team);
+
+        $response = $this->actingAs($admin)->patch('tournaments/' . $tournament->id . '/unsubscribe/' . $team->id);
         $response->assertStatus(302);
 
         $message = new Message('success', "L'équipe a été désinscrite avec succès");
         $response->assertSessionHas(['message' => $message]);
+
+        $this->assertDatabaseMissing('teams', [
+            'name' => $team->name,
+            'tournament_id' => $tournament->id,
+        ]);
     }
 }

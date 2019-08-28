@@ -2,8 +2,6 @@
 
 namespace App\Services\Message;
 
-use App\Exceptions\Message\UnexpectedMessageTypeException;
-
 class Message
 {
     /**

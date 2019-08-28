@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Services\Tournament\SubscribeException;
 use Carbon\Carbon;
 use Tests\TestCase;
 use App\Models\Team;
@@ -13,22 +14,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class TournamentServiceTest extends TestCase
 {
     use RefreshDatabase;
-
-    /** @test */
-    public function can_get_all_of_the_availables_tournaments()
-    {
-        $service = new TournamentService();
-        factory(Tournament::class, 2)->create();
-        factory(Tournament::class, 3)->create([
-            'started_at' => Carbon::tomorrow(),
-            'ended_at' => null
-        ]);
-
-        $tournaments = $service->getAllAvailables();
-
-        $this->assertEquals(3, $tournaments->count());
-        $this->assertInstanceOf(Tournament::class, $tournaments->first());
-    }
 
     /** @test */
     public function can_init_a_tournament_with_4_slots_and_2_teams_by_match_with_1_winner()
@@ -57,55 +42,53 @@ class TournamentServiceTest extends TestCase
     {
         $tournament = factory(Tournament::class)->create();
 
+        $teamName = 'Guzu3k';
+
         $service = new TournamentService();
-        $params = [
-            'tournamentId' => $tournament->id,
-            'teamName' => 'NameTest',
-        ];
 
-        $service->subscribe($params);
+        $service->subscribe($tournament, $teamName);
 
-        $this->assertEquals(1, $tournament->teams->count());
+        $tournament->refresh();
+
+        $this->assertCount(1, $tournament->teams);
+        $this->assertEquals($teamName, $tournament->teams->first()->name);
     }
 
-    /**
-     * @test
-     * @expectedException \App\Exceptions\Tournament\SubscribeException
-     */
+    /** @test */
     public function cant_subscribe_a_team_to_a_tournament_with_existing_name()
     {
+        $this->expectException(SubscribeException::class);
+
         $tournament = factory(Tournament::class)->create();
-        factory(Team::class)->create([
-            'name' => 'NameTest',
-            'tournament_id' => $tournament->id
+
+        $team = factory(Team::class)->make([
+            'name' => 'Nope',
         ]);
 
-        $service = new TournamentService();
-        $params = [
-            'tournamentId' => $tournament->id,
-            'teamName' => 'NameTest',
-        ];
+        $tournament->teams()->save($team);
 
-        $service->subscribe($params);
+        $service = new TournamentService();
+
+        $service->subscribe($tournament, $team->name);
     }
 
-    /**
-     * @test
-     * @expectedException \App\Exceptions\Tournament\SubscribeException
-     */
+    /** @test */
     public function cant_subscribe_a_team_to_a_tournament_with_max_slots()
     {
-        $tournament = factory(Tournament::class)->create(['slots' => 4]);
-        factory(Team::class, 4)->create([
-            'tournament_id' => $tournament->id
+        $this->expectException(SubscribeException::class);
+
+        $tournament = factory(Tournament::class)->create([
+            'slots' => 4,
+            'opponents_by_match' => 2,
+            'winners_by_match' => 1,
         ]);
 
-        $service = new TournamentService();
-        $params = [
-            'tournamentId' => $tournament->id,
-            'teamName' => 'NameTest',
-        ];
+        $tournament->teams()->saveMany(factory(Team::class, 4)->make());
 
-        $service->subscribe($params);
+        $teamName = 'Les bisounours du ciel';
+
+        $service = new TournamentService();
+
+        $service->subscribe($tournament, $teamName);
     }
 }
