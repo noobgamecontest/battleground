@@ -3,22 +3,21 @@
 @section('content')
     <h1>Saisie de résultats</h1>
 
-    @foreach($matches->rounds as $round => $matchesRound)
+    @foreach($matches as $round => $matchesRound)
         <div class="alert alert-dark" role="alert">
             Round  #{{ $round }}
 
-            <button class="btn btn-primary float-right">
+            <button class="btn btn-sm btn-primary float-right">
                 Close round
             </button>
         </div>
 
         <div class="row">
-            @foreach ($matches->rounds[$round] as $match)
+            @foreach ($matches[$round] as $match)
                 <div class="col-lg-4 col-sm-12">
-                    <form action="{{route('results.post', [$matches->tounamentId, $match->id])}}" method="post">
+                    <form action="{{route('results.post', [$match->id])}}" method="post">
                         {{ method_field('post') }}
                         {{ csrf_field() }}
-                        <input type="hidden" name="tournament" value="{{$matches->tounamentId}}">
                         <div class="card" style="margin-bottom: 15px">
                             <div class="card-header">
                                 {{ $match->name }}
@@ -42,7 +41,5 @@
                 </div>
             @endforeach
         </div>
-
-
     @endforeach
 @endsection
