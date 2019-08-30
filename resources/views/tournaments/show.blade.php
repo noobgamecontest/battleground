@@ -41,6 +41,7 @@
                                             <td>
                                                 <form method="post" action="{{ route('tournaments.unsubscribe', [$tournament, $team]) }}">
                                                     @csrf
+                                                    @method('patch')
                                                     <input type="hidden" name="teamId" value="{{ $team->id }}">
                                                     <button type="submit" class="btn btn-danger mb-2">@lang('layouts.common.delete')</button>
                                                 </form>
