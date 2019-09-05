@@ -2,11 +2,53 @@
 
 namespace App\Services\Tournament;
 
+use App\Models\Team;
 use App\Models\Match;
 use App\Models\Tournament;
 
 class TournamentService
 {
+    /**
+     * Inscriptions d'une équipe à un tournoi
+     *
+     * @param \App\Models\Tournament $tournament
+     * @param string $name
+     * @return void
+     * @throws \App\Services\Tournament\SubscribeException
+     */
+    public function subscribe(Tournament $tournament, string $name) : void
+    {
+        $nameAvailable = $this->checkNameAvailable($tournament, $name);
+
+        if (! $nameAvailable) {
+            throw new SubscribeException(trans('layouts.tournaments.subscribe.error.name_exists'));
+        }
+
+        $slotsAvailable = $this->checkSlotsAvailable($tournament);
+
+        if (! $slotsAvailable) {
+            throw new SubscribeException(trans('layouts.tournaments.subscribe.error.max_slots'));
+        }
+
+        $team = new Team([
+            'name' => $name,
+        ]);
+
+        $tournament->teams()->save($team);
+    }
+
+    /**
+     * Supprime une équipe d'un tournoi
+     *
+     * @param \App\Models\Tournament $tournament
+     * @param \App\Models\Team $team
+     * @return void
+     */
+    public function unsubscribe(Tournament $tournament, Team $team) : void
+    {
+        $tournament->teams()->where('id', $team->id)->delete();
+    }
+
     /**
      * Démarre un Tournoi
      *
@@ -106,5 +148,32 @@ class TournamentService
     protected function getNumberOfSlotsForThisRound(int $roundIndex, int $numberOfTeamsByMatch, int $numberOfWinnersByMatch) : int
     {
         return pow($numberOfTeamsByMatch / $numberOfWinnersByMatch, $roundIndex) * $numberOfTeamsByMatch;
-    }    
+    }
+
+    /**
+     * Check la disponibilité du nom d'équipe
+     *
+     * @param \App\Models\Tournament $tournament
+     * @param string $name
+     * @return boolean
+     */
+    protected function checkNameAvailable(Tournament $tournament, string $name) : bool
+    {
+        $target = $tournament->teams->where('name', $name);
+
+        return $target->isEmpty();
+    }
+
+    /**
+     * Check la disponibilité du nom d'équipe
+     *
+     * @param \App\Models\Tournament $tournament
+     * @return boolean
+     */
+    protected function checkSlotsAvailable(Tournament $tournament) : bool
+    {
+        $teams = $tournament->teams->all();
+
+        return $tournament->slots > count($teams);
+    }
 }

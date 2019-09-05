@@ -42,7 +42,7 @@
                                             @endif
                                         </p>
                                         @if ($tournament->slots && $tournament->teams->count() < $tournament->slots)
-                                            <p class="m-0"><a href="#">Inscription ouverte</a></p>
+                                            <p class="m-0"><a href="{{ route('tournaments.show', $tournament) }}">Inscription ouverte</a></p>
                                         @endif
                                     </div>
                                 </div>

@@ -32,7 +32,7 @@ class Message
      */
     protected function setType(string $type) : void
     {
-        if (! in_array($type, ['success', 'error', 'info', 'warning'])) {
+        if (! in_array($type, ['success', 'danger', 'info', 'warning'])) {
             throw new UnexpectedMessageTypeException($type);
         }
 
