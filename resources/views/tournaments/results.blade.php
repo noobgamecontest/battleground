@@ -3,19 +3,26 @@
 @section('content')
     <h1>Saisie de résultats</h1>
 
+    @if($errors->has('teams'))
+        <div class="alert alert-danger">
+            <p>{{ $errors->first('teams') }}</p>
+        </div>
+    @endif
+
     @foreach($matches as $round => $matchesRound)
         <div class="alert alert-dark" role="alert">
             Round  #{{ $round }}
-
-            <button class="btn btn-sm btn-primary float-right">
-                Close round
-            </button>
+            @admin
+                <button class="btn btn-sm btn-primary float-right" {{ $matches[$round]['complete'] ? '' : "disabled" }} >
+                    Fermer le round
+                </button>
+            @endadmin
         </div>
 
         <div class="row">
-            @foreach ($matches[$round] as $match)
+            @foreach ($matches[$round]['matches'] as $match)
                 <div class="col-lg-4 col-sm-12">
-                    <form action="{{route('results.post', [$match->id])}}" method="post">
+                    <form action="{{route('results.post', ['match' => $match])}}" method="post">
                         {{ method_field('post') }}
                         {{ csrf_field() }}
                         <div class="card" style="margin-bottom: 15px">

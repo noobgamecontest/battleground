@@ -17,3 +17,10 @@ $factory->define(Tournament::class, function (Faker $faker) {
         'winners_by_match' => 2,
     ];
 });
+
+$factory->state(Tournament::class, 'versus', function () {
+    return [
+        'opponents_by_match' => 2,
+        'winners_by_match' => 1,
+    ];
+});
