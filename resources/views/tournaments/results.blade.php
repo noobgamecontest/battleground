@@ -22,7 +22,7 @@
         <div class="row">
             @foreach ($matches[$round]['matches'] as $match)
                 <div class="col-lg-4 col-sm-12">
-                    <form action="{{route('results.post', ['match' => $match])}}" method="post">
+                    <form class="form" action="{{route('results.post', ['match' => $match])}}" method="post">
                         {{ method_field('post') }}
                         {{ csrf_field() }}
                         <div class="card" style="margin-bottom: 15px">
@@ -30,18 +30,18 @@
                                 {{ $match->name }}
                             </div>
                             <div class="card-body">
-                                <div class="row" style="margin-bottom: 10px">
-                                    @if (count($match->teams) <= 2)
-                                        @foreach($match->teams as $team)
-                                            @include('components.teams-score', [$team])
-                                        @endforeach
-                                    @endif
+
+                            @foreach($match->teams as $team)
+                                <div class="form-group">
+                                    <label for="">{{ $team->name }}</label>
+                                    <input type="number" class="form-control" name="teams[{{ $team->id }}]" value="{{ $team->pivot->score  }}">
                                 </div>
-                                <div class="row">
-                                    <div class="col-lg-12 col-sm-12">
-                                        <button class="btn btn-primary btn-block">Enregistrer</button>
-                                    </div>
+                            @endforeach
+                            <div class="row">
+                                <div class="col-lg-12 col-sm-12">
+                                    <button class="btn btn-primary btn-block">Enregistrer</button>
                                 </div>
+                            </div>
                             </div>
                         </div>
                     </form>

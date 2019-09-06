@@ -7,18 +7,17 @@ use App\Models\User;
 use App\Models\Team;
 use App\Models\Match;
 use App\Models\Tournament;
-use App\Services\ResultService;
 use App\Services\Tournament\TournamentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class ResultController extends TestCase
+class SetResultTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
      * @test
      */
-    public function cant_add_score_from_match_with_user_basic()
+    public function user_cant_write_scores()
     {
         $this->makeAndActingAsUser();
 
@@ -107,9 +106,9 @@ class ResultController extends TestCase
      * @param \App\Models\Tournament $tournament
      * @return mixed
      */
-    public function getFirstRound(Tournament $tournament)
+    protected function getFirstRound(Tournament $tournament)
     {
-        $resultService = new ResultService();
+        $resultService = new TournamentService();
 
         $matches = $resultService->getMatchs($tournament);
 
@@ -131,7 +130,7 @@ class ResultController extends TestCase
     /**
      * @return void
      */
-    public function makeAndActingAsUser()
+    protected function makeAndActingAsUser()
     {
         $user = factory(User::class)->create();
 

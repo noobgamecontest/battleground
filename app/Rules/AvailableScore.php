@@ -20,18 +20,18 @@ class AvailableScore implements Rule
      * Check if score is not same value for
      *
      * @param  string  $attribute
-     * @param  mixed  $value
+     * @param  mixed  $scores
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $scores)
     {
-        if ($this->noOpponent($value)) {
+        if ($this->noOpponent($scores)) {
             return true;
         }
 
-        $value = array_unique($value);
+        $scores = array_unique($scores);
 
-        return count($value) > 1;
+        return count($scores) > 1;
     }
 
     /**
@@ -45,11 +45,11 @@ class AvailableScore implements Rule
     }
 
     /**
-     * @param array $value
+     * @param array $scores
      * @return bool
      */
-    protected function noOpponent(array $value)
+    protected function noOpponent(array $scores)
     {
-        return count($value) === 1;
+        return count($scores) === 1;
     }
 }

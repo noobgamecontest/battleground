@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Match;
 use App\Models\Tournament;
+use App\Http\Requests\AddResultMatch;
 use App\Http\Requests\EditTournamentRequest;
 use App\Http\Requests\CreateTournamentRequest;
+use App\Services\Message\MessageService;
 use App\Services\Tournament\TournamentService;
 
 class TournamentsController extends Controller
@@ -15,13 +18,20 @@ class TournamentsController extends Controller
     protected $service;
 
     /**
+     * @var \App\Services\Message\MessageService
+     */
+    protected $messageService;
+
+    /**
      * TournamentsController constructor.
      *
      * @param \App\Services\Tournament\TournamentService $service
+     * @param \App\Services\Message\MessageService $messageService
      */
-    public function __construct(TournamentService $service)
+    public function __construct(TournamentService $service, MessageService $messageService)
     {
         $this->service = $service;
+        $this->messageService = $messageService;
     }
 
     /**
@@ -132,5 +142,31 @@ class TournamentsController extends Controller
         $this->service->launch($tournament);
 
         return redirect()->route('tournaments.show', $tournament);
+    }
+
+    /**
+     * @param \App\Models\Tournament $tournament
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function getResults(Tournament $tournament)
+    {
+        $matches = $this->service->getMatchs($tournament);
+
+        return view('tournaments.results', compact('matches', 'tournament'));
+    }
+
+    /**
+     * @param \App\Http\Requests\AddResultMatch $request
+     * @param \App\Models\Match $match
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \App\Services\Message\UnexpectedMessageTypeException
+     */
+    public function setResults(AddResultMatch $request, Match $match)
+    {
+        $this->service->setScores($request->all(), $match);
+
+        $this->messageService->set('success', 'Le résultat a bien été ajouté');
+
+        return redirect()->back();
     }
 }
