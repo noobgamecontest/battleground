@@ -2,6 +2,7 @@
 
 namespace App\Services\Tournament;
 
+use Exception;
 use App\Models\Team;
 use App\Models\Match;
 use App\Models\Tournament;
@@ -124,28 +125,37 @@ class TournamentService
     }
 
     /**
-     * @param $matchList
+     * @param \Illuminate\Support\Collection $matches
      * @return bool
      */
-    protected function roundIsComplete(Collection $matchList): bool
+    protected function roundIsComplete(Collection $matches): bool
     {
-        $status = $matchList->pluck('status')->toArray();
+        foreach ($matches as $match) {
+            if ($match->isComplete()) {
+                continue;
+            }
 
-        return ! in_array('pending', $status,  true);
+            return false;
+        }
+
+        return true;
     }
 
     /**
      * @param array $data
      * @param \App\Models\Match $match
+     * @throws \Exception
      */
     public function setScores(array $data, Match $match)
     {
-        $scores = $data['teams'];
+        $match->load('teams');
 
-        foreach ($scores as $teamId => $score) {
-            $team = $this->retrieveTeam($teamId);
+        foreach ($match->teams as $team) {
+            if ($this->teamNotExistForMatch($team, $data)) {
+                throw new Exception('Score team not found');
+            }
 
-            $match->teams()->updateExistingPivot($team, ['score' => (int) $scores[$team->id]]);
+            $match->teams()->updateExistingPivot($team, ['score' => (int) $data['teams'][$team->id]]);
         }
 
         $this->setCompleteMatch($match);
@@ -154,20 +164,11 @@ class TournamentService
     /**
      * @param \App\Models\Match $match
      */
-    public function setCompleteMatch(Match $match): void
+    protected function setCompleteMatch(Match $match): void
     {
         $match->update([
             'status' => 'complete',
         ]);
-    }
-
-    /**
-     * @param integer $id
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    protected function retrieveTeam($id)
-    {
-        return Team::findOrFail($id);
     }
 
     /**
@@ -180,5 +181,15 @@ class TournamentService
             $match->load('teams');
             return $match;
         });
+    }
+
+    /**
+     * @param \App\Models\Team $team
+     * @param array $data
+     * @return bool
+     */
+    protected function teamNotExistForMatch(Team $team, array $data)
+    {
+        return ! in_array($team->id, array_keys($data['teams']));
     }
 }

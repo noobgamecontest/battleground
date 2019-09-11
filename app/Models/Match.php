@@ -24,4 +24,12 @@ class Match extends Model
     {
         return $this->belongsToMany(Team::class)->withPivot('score');
     }
+
+    /**
+     * @return bool
+     */
+    public function isComplete(): bool
+    {
+        return $this->status === 'complete';
+    }
 }

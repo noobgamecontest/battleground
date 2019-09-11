@@ -22,7 +22,7 @@
         <div class="row">
             @foreach ($matches[$round]['matches'] as $match)
                 <div class="col-lg-4 col-sm-12">
-                    <form class="form" action="{{route('results.post', ['match' => $match])}}" method="post">
+                    <form class="form" action="{{route('tournaments.results.post', ['match' => $match])}}" method="post">
                         {{ method_field('post') }}
                         {{ csrf_field() }}
                         <div class="card" style="margin-bottom: 15px">

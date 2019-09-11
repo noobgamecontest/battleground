@@ -124,7 +124,9 @@ class TournamentsControllerTest extends TestCase
      */
     public function user_cant_write_scores()
     {
-        $this->makeAndActingAsUser();
+        $user = factory(User::class)->create();
+
+        $this->actingAs($user);
 
         $tournament = $this->makeTournament();
 
@@ -132,16 +134,18 @@ class TournamentsControllerTest extends TestCase
 
         $scores = $this->generateScore($randomMatch);
 
-        $response = $this->post(route('results.post', $randomMatch), ['teams' => $scores]);
+        $response = $this->post(route('tournaments.results.post', $randomMatch), ['teams' => $scores]);
         $response->assertStatus(403);
     }
 
     /**
      * @test
      */
-    public function can_add_score_from_match()
+    public function admin_can_add_scores()
     {
-        $this->makeAndActingAsAdmin();
+        $admin = factory(User::class)->state('admin')->create();
+
+        $this->actingAs($admin);
 
         $tournament = $this->makeTournament();
 
@@ -150,7 +154,7 @@ class TournamentsControllerTest extends TestCase
         $this->assertEquals('pending', $randomMatch->status);
 
         $scores = $this->generateScore($randomMatch);
-        $response = $this->post(route('results.post', $randomMatch), ['teams' => $scores]);
+        $response = $this->post(route('tournaments.results.post', $randomMatch), ['teams' => $scores]);
         $response->assertSessionHas('message');
 
         $randomMatch->refresh();
@@ -169,26 +173,28 @@ class TournamentsControllerTest extends TestCase
     /**
      * @test
      */
-    public function round_is_complete_when_all_results_are_set()
+    public function throw_exception_when_team_not_exist_in_match()
     {
-        $this->makeAndActingAsAdmin();
+        $admin = factory(User::class)->state('admin')->create();
+
+        $this->actingAs($admin);
 
         $tournament = $this->makeTournament();
 
-        $round = $this->getFirstRound($tournament);
+        $randomMatch = $this->getRandomMatchFromFirstRound($tournament);
 
-        $this->assertFalse($round['complete']);
+        $this->assertEquals('pending', $randomMatch->status);
 
-        foreach ($round['matches'] as $match) {
-            $scores = $this->generateScore($match);
-            $this->post(route('results.post', $match), ['teams' => $scores]);
+        $scores = [
+            '53' => 20,
+            '10' => 58
+        ];
+
+        try {
+            $this->post(route('tournaments.results.post', $randomMatch), ['teams' => $scores]);
+        } catch (\Exception $e) {
+            $this->assertEquals('Score team not found', $e->getMessage());
         }
-
-        $tournament->refresh();
-
-        $round = $this->getFirstRound($tournament);
-
-        $this->assertTrue($round['complete']);
     }
 
     /**
@@ -231,26 +237,6 @@ class TournamentsControllerTest extends TestCase
 
         return $round['matches']->random();
     }
-
-    /**
-     * @return void
-     */
-    protected function makeAndActingAsUser()
-    {
-        $user = factory(User::class)->create();
-
-        $this->actingAs($user);
-    }
-
-    /**
-     * @return void
-     */
-    protected function makeAndActingAsAdmin()
-    {
-        $admin = factory(User::class)->state('admin')->create();
-        $this->actingAs($admin);
-    }
-
 
     /**
      * @param \App\Models\Match $match
