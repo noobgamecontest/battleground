@@ -7,8 +7,8 @@ use Faker\Generator as Faker;
 
 $factory->define(Match::class, function (Faker $faker) {
     return [
-        'round' => 3,
-        'name' => $faker->bankAccountNumber,
+        'round' => $faker->randomDigit,
+        'name' => 'Fight ' . $faker->colorName,
         'tournament_id' => null
     ];
 });
@@ -24,4 +24,3 @@ $factory->state(Match::class, 'complete', function () {
         'status' => 'complete',
     ];
 });
-

@@ -3,11 +3,12 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use App\Models\User;
 use App\Models\Team;
+use App\Models\User;
 use App\Models\Match;
 use App\Models\Tournament;
-use App\Services\Tournament\TournamentService;
+use App\Services\Message\Message;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class TournamentsControllerTest extends TestCase
@@ -117,6 +118,96 @@ class TournamentsControllerTest extends TestCase
         $response->assertRedirect('tournaments/'. $tournament->id);
 
         $this->assertDatabaseHas('matches', ['tournament_id' => $tournament->id]);
+    }
+
+    /** @test */
+    public function user_can_subscribe_to_a_specific_tournament()
+    {
+        $user = factory(User::class)->create();
+        $tournament = factory(Tournament::class)->create(['slots' => 5]);
+
+        $params = [
+            'teamName' => 'Yolo Swag',
+        ];
+
+        $response = $this->actingAs($user)->post('tournaments/' . $tournament->id . '/subscribe', $params);
+        $response->assertStatus(302);
+
+        $this->assertDatabaseHas('teams', [
+            'name' => $params['teamName'],
+            'tournament_id' => $tournament->id,
+        ]);
+    }
+
+    /** @test */
+    public function user_cant_subscribe_to_a_specific_tournament_with_existing_team_name()
+    {
+        $user = factory(User::class)->create();
+        $tournament = factory(Tournament::class)->create(['slots' => 4]);
+
+        $existingTeam = factory(Team::class)->make([
+            'name' => 'Already take',
+        ]);
+
+        $tournament->teams()->save($existingTeam);
+
+        $params = [
+            'teamName' => $existingTeam->name,
+        ];
+
+        $response = $this->actingAs($user)->post('tournaments/' . $tournament->id . '/subscribe', $params);
+        $response->assertRedirect('tournaments/'. $tournament->id);
+
+        $message = new Message('danger', "Ce nom d'équipe existe déjà");
+        $response->assertSessionHas(['message' => $message]);
+    }
+
+    /** @test */
+    public function user_cant_subscribe_to_a_specific_tournament_with_max_slots()
+    {
+        $user = factory(User::class)->create();
+
+        $tournament = factory(Tournament::class)->create([
+            'slots' => 4,
+            'opponents_by_match' => 2,
+            'winners_by_match' => 1,
+        ]);
+
+        $tournament->teams()->saveMany(factory(Team::class, 4)->make());
+
+        $params = [
+            'teamName' => 'NameTest',
+        ];
+
+        $response = $this->actingAs($user)->post('tournaments/' . $tournament->id . '/subscribe', $params);
+        $response->assertRedirect('tournaments/'. $tournament->id);
+
+        $message = new Message('danger', "Toutes les places sont déjà occupées pour ce tournois");
+        $response->assertSessionHas(['message' => $message]);
+    }
+
+    /** @test */
+    public function an_admin_can_delete_team()
+    {
+        $admin = factory(User::class)->state('admin')->create();
+        $tournament = factory(Tournament::class)->create(['slots' => 4]);
+
+        $team = factory(Team::class)->make([
+            'name' => 'Already take',
+        ]);
+
+        $tournament->teams()->save($team);
+
+        $response = $this->actingAs($admin)->patch('tournaments/' . $tournament->id . '/unsubscribe/' . $team->id);
+        $response->assertStatus(302);
+
+        $message = new Message('success', "L'équipe a été désinscrite avec succès");
+        $response->assertSessionHas(['message' => $message]);
+
+        $this->assertDatabaseMissing('teams', [
+            'name' => $team->name,
+            'tournament_id' => $tournament->id,
+        ]);
     }
 
     /**

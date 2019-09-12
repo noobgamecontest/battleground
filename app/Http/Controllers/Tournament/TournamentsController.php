@@ -1,21 +1,28 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Tournament;
 
+use App\Models\Team;
 use App\Models\Match;
 use App\Models\Tournament;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\AddResultMatch;
+use App\Http\Requests\SubscribeRequest;
+use App\Services\Message\MessageService;
+use App\Services\Message\MessageService;
 use App\Http\Requests\EditTournamentRequest;
 use App\Http\Requests\CreateTournamentRequest;
-use App\Services\Message\MessageService;
 use App\Services\Tournament\TournamentService;
+use App\Services\Tournament\SubscribeException;
+use App\Services\Tournament\TournamentNotReadyException;
 
 class TournamentsController extends Controller
 {
     /**
      * @var \App\Services\Tournament\TournamentService
      */
-    protected $service;
+    protected $tournamentService;
 
     /**
      * @var \App\Services\Message\MessageService
@@ -25,12 +32,12 @@ class TournamentsController extends Controller
     /**
      * TournamentsController constructor.
      *
-     * @param \App\Services\Tournament\TournamentService $service
+     * @param \App\Services\Tournament\TournamentService $tournamentService
      * @param \App\Services\Message\MessageService $messageService
      */
-    public function __construct(TournamentService $service, MessageService $messageService)
+    public function __construct(TournamentService $tournamentService, MessageService $messageService)
     {
-        $this->service = $service;
+        $this->tournamentService = $tournamentService;
         $this->messageService = $messageService;
     }
 
@@ -139,7 +146,13 @@ class TournamentsController extends Controller
      */
     public function launch(Tournament $tournament)
     {
-        $this->service->launch($tournament);
+        try {
+            $this->tournamentService->launch($tournament);
+
+            $this->messageService->set('info', 'Le tournoi a été lancé.');
+        } catch (TournamentNotReadyException $e) {
+            $this->messageService->set('danger', 'Le tournoi ne peut être lancé, il manque des équipes ou il a déjà été lancé.');
+        }
 
         return redirect()->route('tournaments.show', $tournament);
     }

@@ -3,6 +3,7 @@
 namespace App\Services\Message;
 
 use Illuminate\Session\Store;
+use App\Exceptions\Message\UnexpectedMessageTypeException;
 
 class MessageService
 {

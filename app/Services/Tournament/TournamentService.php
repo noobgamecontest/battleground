@@ -11,14 +11,98 @@ use Illuminate\Support\Collection;
 class TournamentService
 {
     /**
+     * Inscriptions d'une équipe à un tournoi
+     *
+     * @param \App\Models\Tournament $tournament
+     * @param string $name
+     * @return void
+     * @throws \App\Services\Tournament\SubscribeException
+     */
+    public function subscribe(Tournament $tournament, string $name) : void
+    {
+        $nameAvailable = $this->checkNameAvailable($tournament, $name);
+
+        if (! $nameAvailable) {
+            throw new SubscribeException(trans('layouts.tournaments.subscribe.error.name_exists'));
+        }
+
+        $slotsAvailable = $this->checkSlotsAvailable($tournament);
+
+        if (! $slotsAvailable) {
+            throw new SubscribeException(trans('layouts.tournaments.subscribe.error.max_slots'));
+        }
+
+        $team = new Team([
+            'name' => $name,
+        ]);
+
+        $tournament->teams()->save($team);
+    }
+
+    /**
+     * Supprime une équipe d'un tournoi
+     *
+     * @param \App\Models\Tournament $tournament
+     * @param \App\Models\Team $team
+     * @return void
+     */
+    public function unsubscribe(Tournament $tournament, Team $team) : void
+    {
+        $tournament->teams()->where('id', $team->id)->delete();
+    }
+
+    /**
      * Démarre un Tournoi
      *
      * @param Tournament $tournament
+     * @throws TournamentNotReadyException
      */
     public function launch(Tournament $tournament) : void
     {
+        if (! $tournament->readyToLaunch()) {
+            throw new TournamentNotReadyException();
+        }
+
         $this->buildTree($tournament);
         $this->distribTeamsForFirstRound($tournament);
+    }
+
+    /**
+     * @param \App\Models\Tournament $tournament
+     * @return mixed
+     */
+    public function getMatchs(Tournament $tournament)
+    {
+        $matchesByRound = $tournament->matches->groupBy('round');
+
+        return $matchesByRound->map(function ($round) {
+            $matchList = $this->getMatchesFromRound($round);
+
+            return [
+                'complete' => $this->roundIsComplete($matchList),
+                'matches' => $matchList,
+            ];
+        });
+    }
+
+    /**
+     * @param array $data
+     * @param \App\Models\Match $match
+     * @throws \Exception
+     */
+    public function setScores(array $data, Match $match)
+    {
+        $match->load('teams');
+
+        foreach ($match->teams as $team) {
+            if ($this->teamNotExistForMatch($team, $data)) {
+                throw new Exception('Score team not found');
+            }
+
+            $match->teams()->updateExistingPivot($team, ['score' => (int) $data['teams'][$team->id]]);
+        }
+
+        $this->setCompleteMatch($match);
     }
 
     /**
@@ -107,21 +191,30 @@ class TournamentService
     }
 
     /**
+     * Check la disponibilité du nom d'équipe
+     *
      * @param \App\Models\Tournament $tournament
-     * @return mixed
+     * @param string $name
+     * @return boolean
      */
-    public function getMatchs(Tournament $tournament)
+    protected function checkNameAvailable(Tournament $tournament, string $name) : bool
     {
-        $matchesByRound = $tournament->matches->groupBy('round');
+        $target = $tournament->teams->where('name', $name);
 
-        return $matchesByRound->map(function ($round) {
-            $matchList = $this->getMatchesFromRound($round);
+        return $target->isEmpty();
+    }
 
-            return [
-                'complete' => $this->roundIsComplete($matchList),
-                'matches' => $matchList,
-            ];
-        });
+    /**
+     * Check la disponibilité du nom d'équipe
+     *
+     * @param \App\Models\Tournament $tournament
+     * @return boolean
+     */
+    protected function checkSlotsAvailable(Tournament $tournament) : bool
+    {
+        $teams = $tournament->teams->all();
+
+        return $tournament->slots > count($teams);
     }
 
     /**
@@ -139,26 +232,6 @@ class TournamentService
         }
 
         return true;
-    }
-
-    /**
-     * @param array $data
-     * @param \App\Models\Match $match
-     * @throws \Exception
-     */
-    public function setScores(array $data, Match $match)
-    {
-        $match->load('teams');
-
-        foreach ($match->teams as $team) {
-            if ($this->teamNotExistForMatch($team, $data)) {
-                throw new Exception('Score team not found');
-            }
-
-            $match->teams()->updateExistingPivot($team, ['score' => (int) $data['teams'][$team->id]]);
-        }
-
-        $this->setCompleteMatch($match);
     }
 
     /**

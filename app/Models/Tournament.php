@@ -30,4 +30,14 @@ class Tournament extends Model
     {
         return $this->hasMany(Match::class);
     }
+
+    /**
+     * Détermine si un tournoi peut être lancé
+     *
+     * @return bool
+     */
+    public function readyToLaunch() : bool
+    {
+        return $this->teams()->count() >= $this->opponents_by_match && ! $this->matches()->count();
+    }
 }

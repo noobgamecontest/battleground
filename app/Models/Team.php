@@ -22,4 +22,12 @@ class Team extends Model
     {
         return $this->belongsToMany(Match::class)->withPivot('score');
     }
+
+    /**
+     * The tournament that belong to the team.
+     */
+    public function tournament()
+    {
+        return $this->belongsTo(Tournament::class);
+    }
 }
