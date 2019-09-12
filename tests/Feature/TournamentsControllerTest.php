@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Services\Tournament\TournamentService;
 use Tests\TestCase;
 use App\Models\Team;
 use App\Models\User;
@@ -210,35 +211,32 @@ class TournamentsControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function user_cant_write_scores()
     {
         $user = factory(User::class)->create();
 
         $this->actingAs($user);
 
-        $tournament = $this->makeTournament();
+        $tournament = factory(Tournament::class)->states('versus', 'launched')->create();
 
         $randomMatch = $this->getRandomMatchFromFirstRound($tournament);
 
         $scores = $this->generateScore($randomMatch);
 
         $response = $this->post(route('tournaments.results.post', $randomMatch), ['teams' => $scores]);
+
         $response->assertStatus(403);
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function admin_can_add_scores()
     {
         $admin = factory(User::class)->state('admin')->create();
 
         $this->actingAs($admin);
 
-        $tournament = $this->makeTournament();
+        $tournament = factory(Tournament::class)->states('versus', 'launched')->create();
 
         $randomMatch = $this->getRandomMatchFromFirstRound($tournament);
 
@@ -261,16 +259,14 @@ class TournamentsControllerTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function throw_exception_when_team_not_exist_in_match()
     {
         $admin = factory(User::class)->state('admin')->create();
 
         $this->actingAs($admin);
 
-        $tournament = $this->makeTournament();
+        $tournament = factory(Tournament::class)->states('versus', 'launched')->create();
 
         $randomMatch = $this->getRandomMatchFromFirstRound($tournament);
 
@@ -289,42 +285,16 @@ class TournamentsControllerTest extends TestCase
     }
 
     /**
-     * @return \App\Models\Tournament
-     */
-    protected function makeTournament()
-    {
-        $tournament = factory(Tournament::class)->state('versus')->create();
-
-        $tournament->teams()->saveMany(factory(Team::class, 16)->make());
-
-        $service = new TournamentService();
-
-        $service->launch($tournament);
-
-        return $tournament;
-    }
-
-    /**
-     * @param \App\Models\Tournament $tournament
-     * @return mixed
-     */
-    protected function getFirstRound(Tournament $tournament)
-    {
-        $resultService = new TournamentService();
-
-        $matches = $resultService->getMatchs($tournament);
-
-        return  $matches->first();
-
-    }
-
-    /**
      * @param \App\Models\Tournament $tournament
      * @return \App\Models\Match
      */
     protected function getRandomMatchFromFirstRound(Tournament $tournament)
     {
-        $round = $this->getFirstRound($tournament);
+        $resultService = new TournamentService();
+
+        $matches = $resultService->getMatchs($tournament);
+
+        $round = $matches->first();
 
         return $round['matches']->random();
     }

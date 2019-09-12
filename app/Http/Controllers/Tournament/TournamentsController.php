@@ -10,7 +10,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AddResultMatch;
 use App\Http\Requests\SubscribeRequest;
 use App\Services\Message\MessageService;
-use App\Services\Message\MessageService;
 use App\Http\Requests\EditTournamentRequest;
 use App\Http\Requests\CreateTournamentRequest;
 use App\Services\Tournament\TournamentService;
@@ -49,6 +48,42 @@ class TournamentsController extends Controller
     public function index()
     {
         return view('tournaments.index', ['tournaments' => Tournament::all()]);
+    }
+
+    /**
+     * Inscrit une équipe
+     *
+     * @param \App\Models\Tournament $tournament
+     * @param \App\Http\Requests\SubscribeRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function subscribe(Tournament $tournament, SubscribeRequest $request)
+    {
+        try {
+            $this->tournamentService->subscribe($tournament, $request->get('teamName'));
+
+            $this->messageService->set('success', trans('layouts.tournaments.subscribe.success'));
+        } catch (SubscribeException $e) {
+            $this->messageService->set('danger', $e->getMessage());
+        }
+
+        return redirect()->route('tournaments.show', $tournament->id);
+    }
+
+    /**
+     * Désincrit une équipe
+     *
+     * @param \App\Models\Tournament $tournament
+     * @param \App\Models\Team $team
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function unsubscribe(Tournament $tournament, Team $team)
+    {
+        $this->tournamentService->unsubscribe($tournament, $team);
+
+        $this->messageService->set('success', trans('layouts.tournaments.unsubscribe.success'));
+
+        return redirect()->back();
     }
 
     /**
@@ -163,7 +198,7 @@ class TournamentsController extends Controller
      */
     public function getResults(Tournament $tournament)
     {
-        $matches = $this->service->getMatchs($tournament);
+        $matches = $this->tournamentService->getMatchs($tournament);
 
         return view('tournaments.results', compact('matches', 'tournament'));
     }
@@ -173,10 +208,11 @@ class TournamentsController extends Controller
      * @param \App\Models\Match $match
      * @return \Illuminate\Http\RedirectResponse
      * @throws \App\Services\Message\UnexpectedMessageTypeException
+     * @throws \Exception
      */
     public function setResults(AddResultMatch $request, Match $match)
     {
-        $this->service->setScores($request->all(), $match);
+        $this->tournamentService->setScores($request->all(), $match);
 
         $this->messageService->set('success', 'Le résultat a bien été ajouté');
 
