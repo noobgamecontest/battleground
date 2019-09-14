@@ -32,6 +32,14 @@ class Tournament extends Model
     }
 
     /**
+     * Get status of the tournament
+     */
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
+
+    /**
      * Détermine si un tournoi peut être lancé
      *
      * @return bool
