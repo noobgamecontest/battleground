@@ -17,7 +17,7 @@
                                 <div class="row align-items-center">
                                     <div class="col-md-4">
                                         <h5 class="card-title">
-                                            {{ $tournament->name }}
+                                            <a href="{{ route('tournaments.show', [$tournament->id]) }}"> {{ $tournament->name }}</a>
                                             @admin
                                                 (<a href="{{ route('tournaments.edit', $tournament) }}">éditer</a>)
                                             @endadmin

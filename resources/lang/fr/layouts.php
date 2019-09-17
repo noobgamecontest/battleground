@@ -8,9 +8,14 @@ return [
         'register' => 'Enregistrer',
         'action' => 'Action',
         'id' => 'Identifiant',
-        'teams' => 'Equipe',
+        'team' => 'Equipe',
+        'teams' => 'Equipes',
         'team_name' => "Nom d'équipe",
         'delete' => 'Supprimer',
+        'platform' => 'Plate-forme',
+        'game' => 'Jeu',
+        'number_of_teams' => 'Nombre d\'équipe(s)',
+        'state' => 'Statut',
     ],
 
     'tournaments' => [
@@ -23,8 +28,8 @@ return [
         'subscribe' => [
             'success' => "L'équipe a été inscrite avec succès",
             'error' => [
-               'name_exists' => "Ce nom d'équipe existe déjà",
-               'max_slots' => "Toutes les places sont déjà occupées pour ce tournois",
+                'name_exists' => "Ce nom d'équipe existe déjà",
+                'max_slots' => "Toutes les places sont déjà occupées pour ce tournois",
             ]
         ],
         'unsubscribe' => [
